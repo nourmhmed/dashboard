@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Orders Dashboard</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #fff8f0 0%, #fef7ed 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        h1 {
+            color: #e6a900;
+            margin: 0;
+            font-size: 2.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        h1 .live-badge {
+            font-size: 0.6rem;
+            background: #ff3333;
+            color: white;
+            padding: 0.3rem 0.6rem;
+            border-radius: 20px;
+            animation: pulse 1.5s infinite;
+        }
+
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: #f1f8e9;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #4caf50;
+        }
+
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #e6a900;
+            margin: 0.5rem 0;
+        }
+
+        .stat-label {
+            color: #6b6b6b;
+            font-size: 0.9rem;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.6rem 1.2rem;
+            background: white;
+            border: 1px solid #e6a900;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .filter-btn.active {
+            background: #e6a900;
+            color: white;
+        }
+
+        .filter-btn:hover {
+            background: #f8d677;
+            color: white;
+        }
+
+        .search-box {
+            padding: 0.6rem 1rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            flex-grow: 1;
+            max-width: 300px;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            margin-bottom: 2rem;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 1rem;
+            text-align: left;
+        }
+
+        th {
+            background: #e6a900;
+            color: #fff;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        tr:nth-child(even) {
+            background: #fffaf3;
+        }
+
+        tr:hover {
+            background: #fff4e0;
+        }
+
+        /* Status badges */
+        .status-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: inline-block;
+            text-align: center;
+            min-width: 90px;
+        }
+
+        .status-pending {
+            background: #ffeed9;
+            color: #e68a00;
+        }
+
+        .status-confirmed {
+            background: #d9f5e8;
+            color: #0c9d58;
+        }
+
+        .status-preparing {
+            background: #e0e7ff;
+            color: #4f46e5;
+        }
+
+        .status-delivering {
+            background: #e0f2fe;
+            color: #0284c7;
+        }
+
+        .status-completed {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        .status-cancelled {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        /* Highlight animation for new orders */
+        .highlight {
+            animation: highlightFade 3s ease;
+        }
+
+        @keyframes highlightFade {
+            0% {
+                background-color: #fff3c4;
+            }
+
+            100% {
+                background-color: transparent;
+            }
+        }
+
+        /* Toast notification */
+        #toast {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background: #e6a900;
+            color: #fff;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            font-weight: bold;
+            z-index: 1000;
+            animation: toastFadeIn 0.3s ease;
+        }
+
+        @keyframes toastFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.6;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        /* Loading indicator */
+        .loading {
+            display: flex;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #e6a900;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            margin-top: 2rem;
+            color: #8a8a8a;
+            font-size: 0.9rem;
+            padding: 1rem;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            th,
+            td {
+                padding: 0.7rem;
+                font-size: 0.9rem;
+            }
+
+            .dashboard-stats {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            .search-box {
+                max-width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .dashboard-stats {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .stat-value {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Live Orders Dashboard <span class="live-badge">LIVE</span></h1>
+            <div class="connection-status">
+                <div class="status-indicator"></div>
+                <span>Connected to Real-Time Updates</span>
+            </div>
+        </header>
+
+        <div class="dashboard-stats">
+            <div class="stat-card">
+                <div class="stat-label">TOTAL ORDERS</div>
+                <div class="stat-value" id="total-orders">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">TODAY'S ORDERS</div>
+                <div class="stat-value" id="today-orders">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">PENDING ORDERS</div>
+                <div class="stat-value" id="pending-orders">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">REVENUE</div>
+                <div class="stat-value" id="total-revenue">LE 0</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="filter-btn active" data-filter="all">All Orders</button>
+            <button class="filter-btn" data-filter="Pending">Pending</button>
+            <button class="filter-btn" data-filter="confirmed">Confirmed</button>
+            <button class="filter-btn" data-filter="preparing">Preparing</button>
+            <button class="filter-btn" data-filter="delivering">Delivering</button>
+            <input type="text" class="search-box" placeholder="Search orders..." id="search-input">
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Name</th>
+                        <th>Phone</th>
+                        <th>Total (EGP)</th>
+                        <th>Items</th>
+                        <th>Payment Method</th>
+                        <th>Status</th>
+                        <th>Time</th>
+                    </tr>
+                </thead>
+                <tbody id="orders-table">
+                    <tr>
+                        <td colspan="8">
+                            <div class="loading">
+                                <div class="loading-spinner"></div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <footer>
+            <p>Automatically updates in real-time • No refresh needed</p>
+        </footer>
+    </div>
+
+    <!-- Toast notification -->
+    <div id="toast">New order received!</div>
+
+    <!-- Audio notification -->
+    <audio id="notification-sound" src="sound.wav" preload="auto"></audio>
+
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+        const SUPABASE_URL = 'https://kegjyekbrxagrhidvyse.supabase.co'
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlZ2p5ZWticnhhZ3JoaWR2eXNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgxOTYzOTUsImV4cCI6MjA3Mzc3MjM5NX0.Lf_Jz-Q8GUM4XChuNJOJXffA_cGNA2vkgZ-41d08eL8'
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+        var channels = supabase;
+
+        console.log("channelschannels", channels)
+
+        const tableBody = document.getElementById('orders-table')
+        const toast = document.getElementById('toast')
+        const sound = document.getElementById('notification-sound')
+        const searchInput = document.getElementById('search-input')
+
+        // Stats elements
+        const totalOrdersEl = document.getElementById('total-orders')
+        const todayOrdersEl = document.getElementById('today-orders')
+        const pendingOrdersEl = document.getElementById('pending-orders')
+        const totalRevenueEl = document.getElementById('total-revenue')
+
+        // Track orders for stats and filtering
+        let orders = []
+        let today = new Date().toISOString().split('T')[0]
+        let currentFilter = 'all'
+        let searchQuery = ''
+
+        // Request permission for browser notifications
+        if (Notification.permission !== 'granted') {
+            Notification.requestPermission()
+        }
+
+        function showToast(message) {
+            toast.textContent = message
+            toast.style.display = 'block'
+            setTimeout(() => toast.style.display = 'none', 4000)
+        }
+
+        function playSound() {
+            sound.currentTime = 0
+            sound.play().catch(e => console.log("Audio play failed:", e))
+        }
+
+        function showBrowserNotification(message) {
+            if (Notification.permission === 'granted') {
+                new Notification('New Order', { body: message })
+            }
+        }
+
+        function updateStats() {
+            // Update total orders
+            totalOrdersEl.textContent = orders.length
+
+            // Update today's orders
+            const todayOrders = orders.filter(order => {
+                const orderDate = new Date(order.created_at).toISOString().split('T')[0]
+                return orderDate === today
+            })
+            todayOrdersEl.textContent = todayOrders.length
+
+            // Update pending orders
+            const pendingOrders = orders.filter(order => order.status === 'Pending')
+            console.log("orders", orders)
+            pendingOrdersEl.textContent = pendingOrders.length
+
+            // Update total revenue
+            const revenue = orders.reduce((sum, order) => sum + order.total, 0)
+            totalRevenueEl.textContent = `LE ${revenue.toLocaleString()}`
+        }
+
+        // Format date/time
+        function formatDateTime(dateString) {
+            const date = new Date(dateString)
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        }
+
+        // Get status badge class
+        function getStatusClass(status) {
+            switch (status.toLowerCase()) {
+                case 'Pending': return 'status-pending'
+                case 'confirmed': return 'status-confirmed'
+                case 'preparing': return 'status-preparing'
+                case 'delivering': return 'status-delivering'
+                case 'completed': return 'status-completed'
+                case 'cancelled': return 'status-cancelled'
+                default: return 'status-pending'
+            }
+        }
+
+        // Filter orders based on current filter and search
+        function filterOrders() {
+            return orders.filter(order => {
+                // Apply status filter
+                if (currentFilter !== 'all' && order.status !== currentFilter) {
+                    return false
+                }
+
+                // Apply search filter
+                if (searchQuery) {
+                    const searchTerm = searchQuery.toLowerCase()
+                    return (
+                        order.id.toString().includes(searchTerm) ||
+                        order.customer_name.toLowerCase().includes(searchTerm) ||
+                        order.phone.includes(searchTerm) ||
+                        order.total.toString().includes(searchTerm)
+                    )
+                }
+
+                return true
+            })
+        }
+
+        // Render all orders based on current filters
+        function renderOrders() {
+            const filteredOrders = filterOrders()
+
+            if (filteredOrders.length === 0) {
+                tableBody.innerHTML = `
+          <tr>
+            <td colspan="8" style="text-align: center; padding: 2rem;">
+              No orders found matching your criteria
+            </td>
+          </tr>
+        `
+                return
+            }
+
+            tableBody.innerHTML = ''
+
+            filteredOrders.forEach(order => {
+                const row = document.createElement('tr')
+                row.innerHTML = `
+          <td>${order.id}</td>
+          <td>${order.customer_name}</td>
+          <td>${order.phone}</td>
+          <td>LE ${order.total}</td>
+          <td>${order.items ? JSON.parse(order.items).map(i => i.name + ' x' + i.quantity).join('<br>') : '-'}</td>
+          <td>${order.payment_method}</td>
+          <td><span class="status-badge ${getStatusClass(order.status)}">${order.status}</span></td>
+          <td>${formatDateTime(order.created_at)}</td>
+        `
+                tableBody.appendChild(row)
+            })
+        }
+
+        // Function to render a single order (for new orders)
+        function renderNewOrder(order) {
+            const filteredOrders = filterOrders()
+            const row = document.createElement('tr')
+            row.classList.add('highlight')
+            row.innerHTML = `
+        <td>${order.id}</td>
+        <td>${order.customer_name}</td>
+        <td>${order.phone}</td>
+        <td>LE ${order.total}</td>
+        <td>${order.items ? JSON.parse(order.items).map(i => i.name + ' x' + i.quantity).join('<br>') : '-'}</td>
+        <td>${order.payment_method}</td>
+        <td><span class="status-badge ${getStatusClass(order.status)}">${order.status}</span></td>
+        <td>${formatDateTime(order.created_at)}</td>
+      `
+
+            tableBody.prepend(row)
+
+            // Remove highlight after animation
+            setTimeout(() => row.classList.remove('highlight'), 3000)
+
+            // Trigger notifications for new orders only
+            const message = `Order #${order.id} from ${order.customer_name}, Total: LE ${order.total}`
+            showToast(message)
+            playSound()
+            console.log("ssound", sound)
+            showBrowserNotification(message)
+        }
+
+        // Load existing orders initially
+        async function loadOrders() {
+            try {
+                const { data, error } = await supabase
+                    .from('orders')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(50)
+
+                if (error) {
+                    console.error('Error loading orders:', error)
+                    showToast('Error loading orders')
+                    return
+                }
+
+                // Store orders and update stats
+                orders = data
+                updateStats()
+                renderOrders()
+
+            } catch (err) {
+                console.error('Failed to load orders:', err)
+                showToast('Failed to load orders')
+            }
+        }
+
+        // Set up event listeners
+        function setupEventListeners() {
+            // Filter buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'))
+                    btn.classList.add('active')
+                    currentFilter = btn.dataset.filter
+                    renderOrders()
+                })
+            })
+
+            // Search input
+            searchInput.addEventListener('input', () => {
+                searchQuery = searchInput.value
+                renderOrders()
+            })
+        }
+
+        // Initialize the dashboard
+        loadOrders()
+        setupEventListeners()
+
+        // Real-time subscription for new orders'
+        console.log('New order received:')
+
+        supabase
+            .channel('orders')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, payload => {
+                console.log('New order received:', payload.new)
+
+                // Add to orders array and update stats
+                orders.unshift(payload.new)
+                updateStats()
+
+                // Render the new order
+                renderNewOrder(payload.new)
+            })
+            .subscribe()
+    </script>
+</body>
+
+</html>
