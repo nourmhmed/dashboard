@@ -15,7 +15,7 @@
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             padding: 1.5rem;
-            background: linear-gradient(135deg, #fff8f0 0%, #fef7ed 100%);
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
             min-height: 100vh;
             color: #333;
         }
@@ -25,6 +25,144 @@
             margin: 0 auto;
         }
 
+        /* Notification Panel at the top */
+        .notification-panel {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            max-height: 350px;
+            transition: max-height 0.5s ease;
+        }
+
+        .notification-panel.open {
+            max-height: 300px;
+        }
+
+        .notification-header {
+            padding: 1rem 1.5rem;
+            background: linear-gradient(135deg, #ffd700 0%, #e6a900 100%);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .notification-header h3 {
+            margin: 0;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .notification-header .indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .notification-header .badge {
+            background: #ff3333;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .notification-content {
+            padding: 1rem;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .notification-item {
+            padding: 1rem;
+            border-bottom: 1px solid #f0f0f0;
+            animation: notificationFadeIn 0.5s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+
+        .notification-item.new {
+            background-color: #fffaf0;
+        }
+
+        .notification-info {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: #e6a900;
+        }
+
+        .notification-details {
+            font-size: 0.9rem;
+            color: #666;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .notification-detail {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .notification-time {
+            font-size: 0.8rem;
+            color: #999;
+        }
+
+        .notification-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .notification-actions button {
+            padding: 0.4rem 0.8rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .view-order {
+            background: #e6a900;
+            color: white;
+        }
+
+        .dismiss {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        @keyframes notificationFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Header styles */
         header {
             display: flex;
             justify-content: space-between;
@@ -32,7 +170,7 @@
             margin-bottom: 1.5rem;
             flex-wrap: wrap;
             gap: 1rem;
-            padding: 1rem;
+            padding: 1.5rem;
             background: white;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
@@ -61,18 +199,33 @@
             align-items: center;
             gap: 0.5rem;
             padding: 0.5rem 1rem;
-            background: #f1f8e9;
             border-radius: 20px;
             font-weight: 500;
+        }
+
+        .status-connected {
+            background: #f1f8e9;
+        }
+
+        .status-disconnected {
+            background: #ffebee;
         }
 
         .status-indicator {
             width: 10px;
             height: 10px;
             border-radius: 50%;
+        }
+
+        .status-connected .status-indicator {
             background: #4caf50;
         }
 
+        .status-disconnected .status-indicator {
+            background: #f44336;
+        }
+
+        /* Dashboard stats */
         .dashboard-stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -82,19 +235,32 @@
 
         .stat-card {
             background: white;
-            padding: 1.2rem;
+            padding: 1.5rem;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
             text-align: center;
-            transition: transform 0.3s ease;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
 
         .stat-card:hover {
             transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #e6a900, #ffd700);
         }
 
         .stat-value {
-            font-size: 2rem;
+            font-size: 2.2rem;
             font-weight: 700;
             color: #e6a900;
             margin: 0.5rem 0;
@@ -105,21 +271,26 @@
             font-size: 0.9rem;
         }
 
+        /* Controls */
         .controls {
             display: flex;
             gap: 1rem;
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
             flex-wrap: wrap;
+            align-items: center;
         }
 
         .filter-btn {
-            padding: 0.6rem 1.2rem;
+            padding: 0.7rem 1.4rem;
             background: white;
             border: 1px solid #e6a900;
             border-radius: 8px;
             cursor: pointer;
             font-weight: 500;
             transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .filter-btn.active {
@@ -132,14 +303,28 @@
             color: white;
         }
 
-        .search-box {
-            padding: 0.6rem 1rem;
-            border: 1px solid #ddd;
-            border-radius: 8px;
+        .search-container {
+            position: relative;
             flex-grow: 1;
             max-width: 300px;
         }
 
+        .search-box {
+            padding: 0.7rem 1rem 0.7rem 2.5rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            width: 100%;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.8rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+
+        /* Table container */
         .table-container {
             background: white;
             border-radius: 12px;
@@ -155,9 +340,8 @@
             border-collapse: collapse;
         }
 
-        th,
-        td {
-            padding: 1rem;
+        th, td {
+            padding: 1.2rem;
             text-align: left;
         }
 
@@ -227,7 +411,6 @@
             0% {
                 background-color: #fff3c4;
             }
-
             100% {
                 background-color: transparent;
             }
@@ -254,7 +437,6 @@
                 opacity: 0;
                 transform: translateY(-10px);
             }
-
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -265,11 +447,9 @@
             0% {
                 opacity: 1;
             }
-
             50% {
                 opacity: 0.6;
             }
-
             100% {
                 opacity: 1;
             }
@@ -295,7 +475,6 @@
             0% {
                 transform: rotate(0deg);
             }
-
             100% {
                 transform: rotate(360deg);
             }
@@ -310,15 +489,52 @@
             padding: 1rem;
         }
 
+        /* Sound button */
+        #enable-sound {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            background: #000000;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Connection retry button */
+        .connection-retry {
+            display: flex;
+            justify-content: center;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        #retry-connection {
+            padding: 0.7rem 1.4rem;
+            background: #e6a900;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
         /* Responsive adjustments */
         @media (max-width: 768px) {
             body {
                 padding: 1rem;
             }
 
-            th,
-            td {
-                padding: 0.7rem;
+            th, td {
+                padding: 0.8rem;
                 font-size: 0.9rem;
             }
 
@@ -333,10 +549,16 @@
 
             .controls {
                 flex-direction: column;
+                align-items: stretch;
             }
 
-            .search-box {
+            .search-container {
                 max-width: 100%;
+            }
+
+            .notification-details {
+                flex-direction: column;
+                gap: 0.25rem;
             }
         }
 
@@ -350,7 +572,17 @@
             }
 
             .stat-value {
-                font-size: 1.5rem;
+                font-size: 1.8rem;
+            }
+
+            .notification-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .notification-actions {
+                align-self: flex-end;
             }
         }
     </style>
@@ -358,18 +590,40 @@
 
 <body>
     <div class="container">
+        <!-- Notification Panel at the top -->
+        <div class="notification-panel" id="notification-panel">
+            <div class="notification-header" id="notification-header">
+                <h3>
+                    <span>📋</span>
+                    Recent Orders
+                    <span class="badge" id="notification-count">0</span>
+                </h3>
+                <div class="indicator">
+                    <span id="notification-indicator-text">No new orders</span>
+                    <span class="dropdown-arrow">▼</span>
+                </div>
+            </div>
+            <div class="notification-content" id="notification-list">
+                <!-- Notifications will be added here dynamically -->
+                <div class="notification-item" style="text-align: center; color: #999;">
+                    No orders yet
+                </div>
+            </div>
+        </div>
+
         <header>
             <h1>Live Orders Dashboard <span class="live-badge">LIVE</span></h1>
-
-            <button id="enable-sound"
-            style="position:fixed; bottom:20px; right:20px; padding:10px 15px; background:#000000; color:#fff; border:none; border-radius:6px; cursor:pointer; z-index:2000;">
-            🔔 Enable Sound
-        </button>
-            <div class="connection-status">
+            <div class="connection-status status-connected" id="connection-status">
                 <div class="status-indicator"></div>
                 <span>Connected to Real-Time Updates</span>
             </div>
         </header>
+        
+        <div class="connection-retry" id="connection-retry" style="display: none;">
+            <button id="retry-connection">
+                <span>🔄</span> Retry Connection
+            </button>
+        </div>
         
         <div class="dashboard-stats">
             <div class="stat-card">
@@ -391,12 +645,26 @@
         </div>
 
         <div class="controls">
-            <button class="filter-btn active" data-filter="all">All Orders</button>
-            <button class="filter-btn" data-filter="Pending">Pending</button>
-            <button class="filter-btn" data-filter="confirmed">Confirmed</button>
-            <button class="filter-btn" data-filter="preparing">Preparing</button>
-            <button class="filter-btn" data-filter="delivering">Delivering</button>
-            <input type="text" class="search-box" placeholder="Search orders..." id="search-input">
+            <button class="filter-btn active" data-filter="all">
+                <span>📋</span> All Orders
+            </button>
+            <button class="filter-btn" data-filter="Pending">
+                <span>⏳</span> Pending
+            </button>
+            <button class="filter-btn" data-filter="confirmed">
+                <span>✅</span> Confirmed
+            </button>
+            <button class="filter-btn" data-filter="preparing">
+                <span>👨‍🍳</span> Preparing
+            </button>
+            <button class="filter-btn" data-filter="delivering">
+                <span>🚚</span> Delivering
+            </button>
+            
+            <div class="search-container">
+                <span class="search-icon">🔍</span>
+                <input type="text" class="search-box" placeholder="Search orders..." id="search-input">
+            </div>
         </div>
 
         <div class="table-container">
@@ -433,9 +701,13 @@
     <!-- Toast notification -->
     <div id="toast">New order received!</div>
 
+    <!-- Sound button -->
+    <button id="enable-sound">
+        <span>🔔</span> Enable Sound
+    </button>
+
     <!-- Audio notification -->
     <audio id="notification-sound" src="sound.wav" preload="auto"></audio>
-
 
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
@@ -444,24 +716,59 @@
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlZ2p5ZWticnhhZ3JoaWR2eXNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgxOTYzOTUsImV4cCI6MjA3Mzc3MjM5NX0.Lf_Jz-Q8GUM4XChuNJOJXffA_cGNA2vkgZ-41d08eL8'
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
-        var channels = supabase;
-
-        console.log("channelschannels", channels)
-
         const tableBody = document.getElementById('orders-table')
         const toast = document.getElementById('toast')
         const sound = document.getElementById('notification-sound')
         const searchInput = document.getElementById('search-input')
         const enableSoundBtn = document.getElementById('enable-sound')
+        const notificationPanel = document.getElementById('notification-panel')
+        const notificationHeader = document.getElementById('notification-header')
+        const notificationList = document.getElementById('notification-list')
+        const notificationCount = document.getElementById('notification-count')
+        const notificationIndicatorText = document.getElementById('notification-indicator-text')
+        const connectionStatus = document.getElementById('connection-status')
+        const connectionRetry = document.getElementById('connection-retry')
+        const retryButton = document.getElementById('retry-connection')
+
+        // Track notifications
+        let notifications = []
+        let unreadCount = 0
+        let panelOpen = false
+        
+        // Track connection and polling
+        let isConnected = false
+        let realtimeSubscription = null
+        let pollingInterval = null
+        let lastOrderId = 0
 
         // Unlock sound on user interaction
         enableSoundBtn.addEventListener('click', () => {
             sound.play().then(() => {
                 console.log("Sound enabled")
-                enableSoundBtn.style.display = 'none' // hide button after enabling
+                enableSoundBtn.style.display = 'none'
             }).catch(err => {
                 console.log("Failed to enable sound:", err)
             })
+        })
+
+        // Toggle notification panel
+        notificationHeader.addEventListener('click', () => {
+            panelOpen = !panelOpen
+            if (panelOpen) {
+                notificationPanel.classList.add('open')
+                unreadCount = 0
+                notificationCount.textContent = '0'
+                notificationCount.style.display = 'none'
+                notificationIndicatorText.textContent = 'Click to collapse'
+                
+                // Mark all notifications as read
+                document.querySelectorAll('.notification-item').forEach(item => {
+                    item.classList.remove('new')
+                })
+            } else {
+                notificationPanel.classList.remove('open')
+                notificationIndicatorText.textContent = unreadCount > 0 ? `${unreadCount} new orders` : 'No new orders'
+            }
         })
 
         // Stats elements
@@ -481,6 +788,19 @@
             Notification.requestPermission()
         }
 
+        function updateConnectionStatus(connected) {
+            isConnected = connected
+            if (connected) {
+                connectionStatus.className = 'connection-status status-connected'
+                connectionStatus.querySelector('span').textContent = 'Connected to Real-Time Updates'
+                connectionRetry.style.display = 'none'
+            } else {
+                connectionStatus.className = 'connection-status status-disconnected'
+                connectionStatus.querySelector('span').textContent = 'Disconnected - Using fallback updates'
+                connectionRetry.style.display = 'flex'
+            }
+        }
+
         function showToast(message) {
             toast.textContent = message
             toast.style.display = 'block'
@@ -498,6 +818,78 @@
             }
         }
 
+        // Add a new notification
+        function addNotification(order) {
+            const notification = {
+                id: order.id,
+                title: `Order #${order.id}`,
+                customer: order.customer_name,
+                total: order.total,
+                items: order.items ? JSON.parse(order.items).length : 0,
+                time: new Date().toLocaleTimeString(),
+                isNew: true
+            }
+            
+            notifications.unshift(notification)
+            
+            // Keep only the latest 10 notifications
+            if (notifications.length > 10) {
+                notifications.pop()
+            }
+            
+            // Update notification UI
+            renderNotifications()
+            
+            // Update badge count
+            unreadCount++
+            notificationCount.textContent = unreadCount
+            notificationCount.style.display = 'flex'
+            notificationIndicatorText.textContent = `${unreadCount} new order${unreadCount !== 1 ? 's' : ''}`
+            
+            // Auto-open panel if it's the first notification
+            if (unreadCount === 1 && !panelOpen) {
+                notificationPanel.classList.add('open')
+                panelOpen = true
+            }
+        }
+
+        // Render notifications in the panel
+        function renderNotifications() {
+            if (notifications.length === 0) {
+                notificationList.innerHTML = `
+                    <div class="notification-item" style="text-align: center; color: #999;">
+                        No orders yet
+                    </div>
+                `
+                return
+            }
+            
+            notificationList.innerHTML = ''
+            
+            notifications.forEach(notification => {
+                const notificationItem = document.createElement('div')
+                notificationItem.className = `notification-item ${notification.isNew ? 'new' : ''}`
+                notificationItem.innerHTML = `
+                    <div class="notification-info">
+                        <div class="notification-title">${notification.title}</div>
+                        <div class="notification-details">
+                            <span class="notification-detail">
+                                <span>👤</span> ${notification.customer}
+                            </span>
+                            <span class="notification-detail">
+                                <span>💰</span> LE ${notification.total}
+                            </span>
+                            <span class="notification-detail">
+                                <span>📦</span> ${notification.items} item${notification.items !== 1 ? 's' : ''}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="notification-time">${notification.time}</div>
+                `
+                notificationList.appendChild(notificationItem)
+            })
+        }
+
         function updateStats() {
             // Update total orders
             totalOrdersEl.textContent = orders.length
@@ -511,7 +903,6 @@
 
             // Update pending orders
             const pendingOrders = orders.filter(order => order.status === 'Pending')
-            console.log("orders", orders)
             pendingOrdersEl.textContent = pendingOrders.length
 
             // Update total revenue
@@ -615,11 +1006,13 @@
             // Remove highlight after animation
             setTimeout(() => row.classList.remove('highlight'), 3000)
 
+            // Add notification for the new order
+            addNotification(order)
+
             // Trigger notifications for new orders only
             const message = `Order #${order.id} from ${order.customer_name}, Total: LE ${order.total}`
             showToast(message)
             playSound()
-            console.log("ssound", sound)
             showBrowserNotification(message)
         }
 
@@ -635,6 +1028,8 @@
                 if (error) {
                     console.error('Error loading orders:', error)
                     showToast('Error loading orders')
+                    // Start polling as fallback
+                    startPolling()
                     return
                 }
 
@@ -643,10 +1038,118 @@
                 updateStats()
                 renderOrders()
 
+                // Set the last order ID for polling
+                if (data.length > 0) {
+                    lastOrderId = Math.max(...data.map(order => order.id))
+                }
+
+                // Add existing orders to notifications
+                data.slice(0, 5).forEach(order => {
+                    const notification = {
+                        id: order.id,
+                        title: `Order #${order.id}`,
+                        customer: order.customer_name,
+                        total: order.total,
+                        items: order.items ? JSON.parse(order.items).length : 0,
+                        time: new Date(order.created_at).toLocaleTimeString(),
+                        isNew: false
+                    }
+                    notifications.push(notification)
+                })
+                
+                renderNotifications()
+
             } catch (err) {
                 console.error('Failed to load orders:', err)
                 showToast('Failed to load orders')
+                // Start polling as fallback
+                startPolling()
             }
+        }
+
+        // Poll for new orders (fallback method)
+        async function checkForNewOrders() {
+            try {
+                const { data, error } = await supabase
+                    .from('orders')
+                    .select('*')
+                    .gt('id', lastOrderId)
+                    .order('id', { ascending: true })
+
+                if (error) {
+                    console.error('Error polling for new orders:', error)
+                    return
+                }
+
+                if (data && data.length > 0) {
+                    // Process new orders
+                    data.forEach(order => {
+                        orders.unshift(order)
+                        renderNewOrder(order)
+                        lastOrderId = Math.max(lastOrderId, order.id)
+                    })
+                    
+                    updateStats()
+                }
+            } catch (err) {
+                console.error('Error in polling:', err)
+            }
+        }
+
+        function startPolling() {
+            // Clear any existing interval
+            if (pollingInterval) {
+                clearInterval(pollingInterval)
+            }
+            
+            // Check for new orders every 10 seconds
+            pollingInterval = setInterval(checkForNewOrders, 10000)
+            updateConnectionStatus(false)
+        }
+
+        function stopPolling() {
+            if (pollingInterval) {
+                clearInterval(pollingInterval)
+                pollingInterval = null
+            }
+        }
+
+        function setupRealtimeSubscription() {
+            // Remove existing subscription if any
+            if (realtimeSubscription) {
+                supabase.removeChannel(realtimeSubscription)
+            }
+            
+            // Create new real-time subscription
+            realtimeSubscription = supabase
+                .channel('orders')
+                .on('postgres_changes', { 
+                    event: 'INSERT', 
+                    schema: 'public', 
+                    table: 'orders' 
+                }, payload => {
+                    console.log('New order received:', payload.new)
+                    updateConnectionStatus(true)
+
+                    // Add to orders array and update stats
+                    orders.unshift(payload.new)
+                    updateStats()
+
+                    // Update last order ID
+                    lastOrderId = Math.max(lastOrderId, payload.new.id)
+
+                    // Render the new order
+                    renderNewOrder(payload.new)
+                })
+                .subscribe((status) => {
+                    if (status === 'SUBSCRIBED') {
+                        updateConnectionStatus(true)
+                        stopPolling()
+                    } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+                        updateConnectionStatus(false)
+                        startPolling()
+                    }
+                })
         }
 
         // Set up event listeners
@@ -666,28 +1169,30 @@
                 searchQuery = searchInput.value
                 renderOrders()
             })
+            
+            // Retry connection button
+            retryButton.addEventListener('click', () => {
+                setupRealtimeSubscription()
+                showToast('Attempting to reconnect...')
+            })
         }
 
         // Initialize the dashboard
         loadOrders()
         setupEventListeners()
+        setupRealtimeSubscription()
 
-        // Real-time subscription for new orders'
-        console.log('New order received:')
+        // Add offline/online detection
+        window.addEventListener('online', () => {
+            showToast('Connection restored')
+            setupRealtimeSubscription()
+        })
 
-        supabase
-            .channel('orders')
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, payload => {
-                console.log('New order received:', payload.new)
-
-                // Add to orders array and update stats
-                orders.unshift(payload.new)
-                updateStats()
-
-                // Render the new order
-                renderNewOrder(payload.new)
-            })
-            .subscribe()
+        window.addEventListener('offline', () => {
+            showToast('Connection lost - using fallback updates')
+            updateConnectionStatus(false)
+            startPolling()
+        })
     </script>
 </body>
 
