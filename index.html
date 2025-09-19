@@ -37,7 +37,7 @@
         }
 
         .notification-panel.open {
-            max-height: 300px;
+            max-height: 58px;
         }
 
         .notification-header {
@@ -90,6 +90,31 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .notification-item:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.2), transparent);
+            transition: left 0.7s ease;
+        }
+
+        .notification-item:hover:before {
+            left: 100%;
+        }
+
+        .notification-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: #fffdf5;
         }
 
         .notification-item:last-child {
@@ -131,6 +156,12 @@
         .notification-actions {
             display: flex;
             gap: 0.5rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .notification-item:hover .notification-actions {
+            opacity: 1;
         }
 
         .notification-actions button {
@@ -139,6 +170,7 @@
             border-radius: 4px;
             cursor: pointer;
             font-size: 0.8rem;
+            transition: all 0.2s ease;
         }
 
         .view-order {
@@ -146,9 +178,17 @@
             color: white;
         }
 
+        .view-order:hover {
+            background: #d39e00;
+        }
+
         .dismiss {
             background: #f0f0f0;
             color: #666;
+        }
+
+        .dismiss:hover {
+            background: #e0e0e0;
         }
 
         @keyframes notificationFadeIn {
@@ -199,30 +239,16 @@
             align-items: center;
             gap: 0.5rem;
             padding: 0.5rem 1rem;
+            background: #f1f8e9;
             border-radius: 20px;
             font-weight: 500;
-        }
-
-        .status-connected {
-            background: #f1f8e9;
-        }
-
-        .status-disconnected {
-            background: #ffebee;
         }
 
         .status-indicator {
             width: 10px;
             height: 10px;
             border-radius: 50%;
-        }
-
-        .status-connected .status-indicator {
             background: #4caf50;
-        }
-
-        .status-disconnected .status-indicator {
-            background: #f44336;
         }
 
         /* Dashboard stats */
@@ -242,6 +268,7 @@
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             position: relative;
             overflow: hidden;
+            cursor: pointer;
         }
 
         .stat-card:hover {
@@ -314,6 +341,13 @@
             border: 1px solid #ddd;
             border-radius: 8px;
             width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #e6a900;
+            box-shadow: 0 0 0 3px rgba(230, 169, 0, 0.2);
         }
 
         .search-icon {
@@ -351,6 +385,17 @@
             font-weight: 600;
             position: sticky;
             top: 0;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.3s ease;
+        }
+
+        th:hover {
+            background: #d39e00;
+        }
+
+        tr {
+            transition: all 0.3s ease;
         }
 
         tr:nth-child(even) {
@@ -359,6 +404,8 @@
 
         tr:hover {
             background: #fff4e0;
+            transform: scale(1.01);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
 
         /* Status badges */
@@ -370,6 +417,13 @@
             display: inline-block;
             text-align: center;
             min-width: 90px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .status-badge:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
         .status-pending {
@@ -480,6 +534,141 @@
             }
         }
 
+        /* Order detail modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            color: #e6a900;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #999;
+            transition: color 0.3s ease;
+        }
+
+        .close-modal:hover {
+            color: #333;
+        }
+
+        .order-details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .order-detail-item {
+            margin-bottom: 1rem;
+        }
+
+        .order-detail-label {
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 0.25rem;
+        }
+
+        .order-detail-value {
+            font-size: 1.1rem;
+        }
+
+        .items-list {
+            margin-top: 1rem;
+        }
+
+        .item-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .item-row:last-child {
+            border-bottom: none;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+        }
+
+        .modal-btn {
+            padding: 0.7rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #e6a900;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #d39e00;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
         /* Footer */
         footer {
             text-align: center;
@@ -504,27 +693,35 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            transition: all 0.3s ease;
         }
 
-        /* Connection retry button */
-        .connection-retry {
-            display: flex;
-            justify-content: center;
-            padding: 1rem;
-            margin-bottom: 1rem;
+        #enable-sound:hover {
+            background: #333;
+            transform: translateY(-2px);
         }
 
-        #retry-connection {
-            padding: 0.7rem 1.4rem;
-            background: #e6a900;
-            color: white;
+        /* Theme toggle */
+        .theme-toggle {
+            position: fixed;
+            bottom: 70px;
+            right: 20px;
+            padding: 10px;
+            background: #000000;
+            color: #fff;
             border: none;
-            border-radius: 8px;
+            border-radius: 6px;
             cursor: pointer;
-            font-weight: 500;
+            z-index: 2000;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            background: #333;
+            transform: translateY(-2px);
         }
 
         /* Responsive adjustments */
@@ -560,6 +757,10 @@
                 flex-direction: column;
                 gap: 0.25rem;
             }
+
+            .order-details-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         @media (max-width: 480px) {
@@ -584,6 +785,166 @@
             .notification-actions {
                 align-self: flex-end;
             }
+        }
+
+        /* Dark mode styles */
+        body.dark-mode {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            color: #f0f0f0;
+        }
+
+        body.dark-mode .notification-panel,
+        body.dark-mode header,
+        body.dark-mode .stat-card,
+        body.dark-mode .table-container,
+        body.dark-mode .filter-btn,
+        body.dark-mode .search-box {
+            background: #2d2d2d;
+            color: #f0f0f0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        body.dark-mode .filter-btn {
+            border-color: #e6a900;
+        }
+
+        body.dark-mode .filter-btn.active {
+            background: #e6a900;
+            color: #2d2d2d;
+        }
+
+        body.dark-mode tr:nth-child(even) {
+            background: #3a3a3a;
+        }
+
+        body.dark-mode tr:hover {
+            background: #4a4a4a;
+        }
+
+        body.dark-mode .notification-item:hover {
+            background-color: #3a3a3a;
+        }
+
+        body.dark-mode .modal-content {
+            background: #2d2d2d;
+            color: #f0f0f0;
+        }
+
+        body.dark-mode .modal-header {
+            border-bottom-color: #444;
+        }
+
+        body.dark-mode .item-row {
+            border-bottom-color: #444;
+        }
+
+        body.dark-mode .modal-actions {
+            border-top-color: #444;
+        }
+
+        body.dark-mode .btn-secondary {
+            background: #444;
+            color: #f0f0f0;
+        }
+
+        body.dark-mode .btn-secondary:hover {
+            background: #555;
+        }
+
+        /* Quick actions menu */
+        .quick-actions {
+            position: fixed;
+            bottom: 120px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 2000;
+        }
+
+        .quick-action-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #e6a900;
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .quick-action-btn:hover {
+            transform: translateY(-3px) scale(1.1);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Order status progress bar */
+        .status-progress {
+            display: flex;
+            justify-content: space-between;
+            margin: 1rem 0;
+            position: relative;
+        }
+
+        .status-step {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+            position: relative;
+        }
+
+        .status-step.active {
+            background: #e6a900;
+            color: white;
+        }
+
+        .status-step.completed {
+            background: #4caf50;
+            color: white;
+        }
+
+        .status-progress-line {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            height: 3px;
+            width: 100%;
+            background: #f0f0f0;
+            transform: translateY(-50%);
+            z-index: 1;
+        }
+
+        .status-progress-fill {
+            height: 100%;
+            background: #4caf50;
+            transition: width 0.5s ease;
+        }
+
+        .status-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+        }
+
+        .status-label {
+            font-size: 0.8rem;
+            color: #666;
+            text-align: center;
+            width: 80px;
+            margin-left: -25px;
+        }
+
+        body.dark-mode .status-label {
+            color: #aaa;
         }
     </style>
 </head>
@@ -613,32 +974,26 @@
 
         <header>
             <h1>Live Orders Dashboard <span class="live-badge">LIVE</span></h1>
-            <div class="connection-status status-connected" id="connection-status">
+            <div class="connection-status">
                 <div class="status-indicator"></div>
                 <span>Connected to Real-Time Updates</span>
             </div>
         </header>
         
-        <div class="connection-retry" id="connection-retry" style="display: none;">
-            <button id="retry-connection">
-                <span>🔄</span> Retry Connection
-            </button>
-        </div>
-        
         <div class="dashboard-stats">
-            <div class="stat-card">
+            <div class="stat-card" id="total-orders-card">
                 <div class="stat-label">TOTAL ORDERS</div>
                 <div class="stat-value" id="total-orders">0</div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card" id="today-orders-card">
                 <div class="stat-label">TODAY'S ORDERS</div>
                 <div class="stat-value" id="today-orders">0</div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card" id="pending-orders-card">
                 <div class="stat-label">PENDING ORDERS</div>
                 <div class="stat-value" id="pending-orders">0</div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card" id="revenue-card">
                 <div class="stat-label">REVENUE</div>
                 <div class="stat-value" id="total-revenue">LE 0</div>
             </div>
@@ -671,14 +1026,14 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Order ID</th>
-                        <th>Name</th>
-                        <th>Phone</th>
-                        <th>Total (EGP)</th>
+                        <th data-sort="id">Order ID ↕</th>
+                        <th data-sort="customer_name">Name ↕</th>
+                        <th data-sort="phone">Phone ↕</th>
+                        <th data-sort="total">Total (EGP) ↕</th>
                         <th>Items</th>
-                        <th>Payment Method</th>
-                        <th>Status</th>
-                        <th>Time</th>
+                        <th data-sort="payment_method">Payment Method ↕</th>
+                        <th data-sort="status">Status ↕</th>
+                        <th data-sort="created_at">Time ↕</th>
                     </tr>
                 </thead>
                 <tbody id="orders-table">
@@ -698,6 +1053,23 @@
         </footer>
     </div>
 
+    <!-- Order detail modal -->
+    <div class="modal" id="order-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Order Details</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div id="modal-body">
+                <!-- Order details will be populated here -->
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn btn-secondary" id="close-modal-btn">Close</button>
+                <button class="modal-btn btn-primary" id="update-status-btn">Update Status</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast notification -->
     <div id="toast">New order received!</div>
 
@@ -705,6 +1077,24 @@
     <button id="enable-sound">
         <span>🔔</span> Enable Sound
     </button>
+
+    <!-- Theme toggle -->
+    <button class="theme-toggle" id="theme-toggle">
+        <span>🌙</span>
+    </button>
+
+    <!-- Quick actions menu -->
+    <div class="quick-actions">
+        <button class="quick-action-btn" id="refresh-btn" title="Refresh orders">
+            <span>🔄</span>
+        </button>
+        <button class="quick-action-btn" id="clear-search-btn" title="Clear search">
+            <span>❌</span>
+        </button>
+        <button class="quick-action-btn" id="export-btn" title="Export data">
+            <span>📊</span>
+        </button>
+    </div>
 
     <!-- Audio notification -->
     <audio id="notification-sound" src="sound.wav" preload="auto"></audio>
@@ -726,20 +1116,22 @@
         const notificationList = document.getElementById('notification-list')
         const notificationCount = document.getElementById('notification-count')
         const notificationIndicatorText = document.getElementById('notification-indicator-text')
-        const connectionStatus = document.getElementById('connection-status')
-        const connectionRetry = document.getElementById('connection-retry')
-        const retryButton = document.getElementById('retry-connection')
+        const themeToggle = document.getElementById('theme-toggle')
+        const orderModal = document.getElementById('order-modal')
+        const modalBody = document.getElementById('modal-body')
+        const closeModalBtn = document.getElementById('close-modal-btn')
+        const updateStatusBtn = document.getElementById('update-status-btn')
+        const refreshBtn = document.getElementById('refresh-btn')
+        const clearSearchBtn = document.getElementById('clear-search-btn')
+        const exportBtn = document.getElementById('export-btn')
 
         // Track notifications
         let notifications = []
         let unreadCount = 0
         let panelOpen = false
-        
-        // Track connection and polling
-        let isConnected = false
-        let realtimeSubscription = null
-        let pollingInterval = null
-        let lastOrderId = 0
+        let sortField = 'created_at'
+        let sortDirection = 'desc'
+        let selectedOrder = null
 
         // Unlock sound on user interaction
         enableSoundBtn.addEventListener('click', () => {
@@ -771,11 +1163,93 @@
             }
         })
 
+        // Theme toggle
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode')
+            themeToggle.innerHTML = document.body.classList.contains('dark-mode') ? '<span>☀️</span>' : '<span>🌙</span>'
+            // Save theme preference to localStorage
+            localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light')
+        })
+
+        // Check for saved theme preference
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode')
+            themeToggle.innerHTML = '<span>☀️</span>'
+        }
+
+        // Modal handlers
+        closeModalBtn.addEventListener('click', () => {
+            orderModal.style.display = 'none'
+        })
+
+        document.querySelector('.close-modal').addEventListener('click', () => {
+            orderModal.style.display = 'none'
+        })
+
+        window.addEventListener('click', (e) => {
+            if (e.target === orderModal) {
+                orderModal.style.display = 'none'
+            }
+        })
+
+        // Quick actions
+        refreshBtn.addEventListener('click', () => {
+            loadOrders()
+            showToast('Orders refreshed')
+        })
+
+        clearSearchBtn.addEventListener('click', () => {
+            searchInput.value = ''
+            searchQuery = ''
+            renderOrders()
+        })
+
+        exportBtn.addEventListener('click', () => {
+            exportOrders()
+        })
+
         // Stats elements
         const totalOrdersEl = document.getElementById('total-orders')
         const todayOrdersEl = document.getElementById('today-orders')
         const pendingOrdersEl = document.getElementById('pending-orders')
         const totalRevenueEl = document.getElementById('total-revenue')
+
+        // Stats cards
+        const totalOrdersCard = document.getElementById('total-orders-card')
+        const todayOrdersCard = document.getElementById('today-orders-card')
+        const pendingOrdersCard = document.getElementById('pending-orders-card')
+        const revenueCard = document.getElementById('revenue-card')
+
+        // Add click handlers to stats cards
+        totalOrdersCard.addEventListener('click', () => {
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'))
+            document.querySelector('.filter-btn[data-filter="all"]').classList.add('active')
+            currentFilter = 'all'
+            renderOrders()
+        })
+
+        todayOrdersCard.addEventListener('click', () => {
+            // Filter to show only today's orders
+            const today = new Date().toISOString().split('T')[0]
+            const todayOrders = orders.filter(order => {
+                const orderDate = new Date(order.created_at).toISOString().split('T')[0]
+                return orderDate === today
+            })
+            renderFilteredOrders(todayOrders, "Today's Orders")
+        })
+
+        pendingOrdersCard.addEventListener('click', () => {
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'))
+            document.querySelector('.filter-btn[data-filter="Pending"]').classList.add('active')
+            currentFilter = 'Pending'
+            renderOrders()
+        })
+
+        revenueCard.addEventListener('click', () => {
+            // Sort by highest value orders
+            const sortedByRevenue = [...orders].sort((a, b) => b.total - a.total)
+            renderFilteredOrders(sortedByRevenue, "Sorted by Revenue (High to Low)")
+        })
 
         // Track orders for stats and filtering
         let orders = []
@@ -786,19 +1260,6 @@
         // Request permission for browser notifications
         if (Notification.permission !== 'granted') {
             Notification.requestPermission()
-        }
-
-        function updateConnectionStatus(connected) {
-            isConnected = connected
-            if (connected) {
-                connectionStatus.className = 'connection-status status-connected'
-                connectionStatus.querySelector('span').textContent = 'Connected to Real-Time Updates'
-                connectionRetry.style.display = 'none'
-            } else {
-                connectionStatus.className = 'connection-status status-disconnected'
-                connectionStatus.querySelector('span').textContent = 'Disconnected - Using fallback updates'
-                connectionRetry.style.display = 'flex'
-            }
         }
 
         function showToast(message) {
@@ -885,8 +1346,57 @@
                         </div>
                     </div>
                     <div class="notification-time">${notification.time}</div>
+                    <div class="notification-actions">
+                        <button class="view-order" data-id="${notification.id}">View</button>
+                        <button class="dismiss">Dismiss</button>
+                    </div>
                 `
                 notificationList.appendChild(notificationItem)
+            })
+
+            // Add event listeners to notification buttons
+            document.querySelectorAll('.notification-item .view-order').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation()
+                    const orderId = btn.getAttribute('data-id')
+                    const order = orders.find(o => o.id == orderId)
+                    if (order) {
+                        showOrderDetails(order)
+                    }
+                })
+            })
+
+            document.querySelectorAll('.notification-item .dismiss').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation()
+                    const notificationItem = btn.closest('.notification-item')
+                    notificationItem.style.opacity = '0'
+                    setTimeout(() => {
+                        notificationItem.remove()
+                        if (notificationList.children.length === 0) {
+                            notificationList.innerHTML = `
+                                <div class="notification-item" style="text-align: center; color: #999;">
+                                    No notifications
+                                </div>
+                            `
+                        }
+                    }, 300)
+                })
+            })
+
+            // Make entire notification item clickable
+            document.querySelectorAll('.notification-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    if (!e.target.closest('.notification-actions')) {
+                        const orderId = item.querySelector('.view-order')?.getAttribute('data-id')
+                        if (orderId) {
+                            const order = orders.find(o => o.id == orderId)
+                            if (order) {
+                                showOrderDetails(order)
+                            }
+                        }
+                    }
+                })
             })
         }
 
@@ -929,6 +1439,99 @@
             }
         }
 
+        // Show order details in modal
+        function showOrderDetails(order) {
+            selectedOrder = order
+            const items = order.items ? JSON.parse(order.items) : []
+            
+            // Create status progress bar
+            const statusSteps = ['Pending', 'confirmed', 'preparing', 'delivering', 'completed']
+            const currentStatusIndex = statusSteps.indexOf(order.status.toLowerCase())
+            
+            let progressHTML = `
+                <div class="status-progress">
+                    <div class="status-progress-line">
+                        <div class="status-progress-fill" style="width: ${(currentStatusIndex / (statusSteps.length - 1)) * 100}%"></div>
+                    </div>
+            `
+            
+            statusSteps.forEach((step, index) => {
+                let statusClass = ''
+                if (index < currentStatusIndex) statusClass = 'completed'
+                else if (index === currentStatusIndex) statusClass = 'active'
+                
+                progressHTML += `<div class="status-step ${statusClass}">${index + 1}</div>`
+            })
+            
+            progressHTML += `
+                </div>
+                <div class="status-labels">
+                    <div class="status-label">Pending</div>
+                    <div class="status-label">Confirmed</div>
+                    <div class="status-label">Preparing</div>
+                    <div class="status-label">Delivering</div>
+                    <div class="status-label">Completed</div>
+                </div>
+            `
+            
+            modalBody.innerHTML = `
+                ${progressHTML}
+                <div class="order-details-grid">
+                    <div class="order-detail-item">
+                        <div class="order-detail-label">Order ID</div>
+                        <div class="order-detail-value">#${order.id}</div>
+                    </div>
+                    <div class="order-detail-item">
+                        <div class="order-detail-label">Customer Name</div>
+                        <div class="order-detail-value">${order.customer_name}</div>
+                    </div>
+                    <div class="order-detail-item">
+                        <div class="order-detail-label">Phone</div>
+                        <div class="order-detail-value">${order.phone}</div>
+                    </div>
+                    <div class="order-detail-item">
+                        <div class="order-detail-label">Total Amount</div>
+                        <div class="order-detail-value">LE ${order.total}</div>
+                    </div>
+                    <div class="order-detail-item">
+                        <div class="order-detail-label">Payment Method</div>
+                        <div class="order-detail-value">${order.payment_method}</div>
+                    </div>
+                    <div class="order-detail-item">
+                        <div class="order-detail-label">Order Time</div>
+                        <div class="order-detail-value">${formatDateTime(order.created_at)}</div>
+                    </div>
+                </div>
+                <div class="order-detail-item">
+                    <div class="order-detail-label">Items</div>
+                    <div class="items-list">
+            `
+            
+            items.forEach(item => {
+                modalBody.innerHTML += `
+                    <div class="item-row">
+                        <span>${item.name} x${item.quantity}</span>
+                        <span>LE ${item.price * item.quantity}</span>
+                    </div>
+                `
+            })
+            
+            modalBody.innerHTML += `
+                    </div>
+                </div>
+                <div class="order-detail-item">
+                    <div class="order-detail-label">Delivery Address</div>
+                    <div class="order-detail-value">${order.delivery_address || 'N/A'}</div>
+                </div>
+                <div class="order-detail-item">
+                    <div class="order-detail-label">Special Instructions</div>
+                    <div class="order-detail-value">${order.special_instructions || 'None'}</div>
+                </div>
+            `
+            
+            orderModal.style.display = 'flex'
+        }
+
         // Filter orders based on current filter and search
         function filterOrders() {
             return orders.filter(order => {
@@ -955,12 +1558,16 @@
         // Render all orders based on current filters
         function renderOrders() {
             const filteredOrders = filterOrders()
+            renderFilteredOrders(filteredOrders)
+        }
 
+        // Render a custom set of orders
+        function renderFilteredOrders(filteredOrders, message) {
             if (filteredOrders.length === 0) {
                 tableBody.innerHTML = `
           <tr>
             <td colspan="8" style="text-align: center; padding: 2rem;">
-              No orders found matching your criteria
+              ${message || 'No orders found matching your criteria'}
             </td>
           </tr>
         `
@@ -981,6 +1588,11 @@
           <td><span class="status-badge ${getStatusClass(order.status)}">${order.status}</span></td>
           <td>${formatDateTime(order.created_at)}</td>
         `
+                // Make row clickable to view details
+                row.addEventListener('click', () => {
+                    showOrderDetails(order)
+                })
+                
                 tableBody.appendChild(row)
             })
         }
@@ -1001,6 +1613,11 @@
         <td>${formatDateTime(order.created_at)}</td>
       `
 
+            // Make row clickable to view details
+            row.addEventListener('click', () => {
+                showOrderDetails(order)
+            })
+
             tableBody.prepend(row)
 
             // Remove highlight after animation
@@ -1016,9 +1633,84 @@
             showBrowserNotification(message)
         }
 
+        // Sort orders
+        function sortOrders(field) {
+            if (sortField === field) {
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc'
+            } else {
+                sortField = field
+                sortDirection = 'desc'
+            }
+            
+            orders.sort((a, b) => {
+                let valueA = a[field]
+                let valueB = b[field]
+                
+                // Handle different data types
+                if (field === 'created_at') {
+                    valueA = new Date(valueA)
+                    valueB = new Date(valueB)
+                } else if (field === 'total') {
+                    valueA = Number(valueA)
+                    valueB = Number(valueB)
+                }
+                
+                if (valueA < valueB) return sortDirection === 'asc' ? -1 : 1
+                if (valueA > valueB) return sortDirection === 'asc' ? 1 : -1
+                return 0
+            })
+            
+            renderOrders()
+            
+            // Update sort indicators
+            document.querySelectorAll('th').forEach(th => {
+                th.innerHTML = th.innerHTML.replace(' ↑', '').replace(' ↓', '')
+                if (th.getAttribute('data-sort') === field) {
+                    th.innerHTML += sortDirection === 'asc' ? ' ↑' : ' ↓'
+                }
+            })
+        }
+
+        // Export orders to CSV
+        function exportOrders() {
+            const filteredOrders = filterOrders()
+            if (filteredOrders.length === 0) {
+                showToast('No orders to export')
+                return
+            }
+            
+            let csv = 'Order ID,Customer Name,Phone,Total,Payment Method,Status,Time\n'
+            
+            filteredOrders.forEach(order => {
+                csv += `"${order.id}","${order.customer_name}","${order.phone}","${order.total}","${order.payment_method}","${order.status}","${formatDateTime(order.created_at)}"\n`
+            })
+            
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+            const url = URL.createObjectURL(blob)
+            const link = document.createElement('a')
+            link.setAttribute('href', url)
+            link.setAttribute('download', `orders_export_${new Date().toISOString().split('T')[0]}.csv`)
+            link.style.visibility = 'hidden'
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+            
+            showToast('Orders exported successfully')
+        }
+
         // Load existing orders initially
         async function loadOrders() {
             try {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="8">
+                            <div class="loading">
+                                <div class="loading-spinner"></div>
+                            </div>
+                        </td>
+                    </tr>
+                `
+                
                 const { data, error } = await supabase
                     .from('orders')
                     .select('*')
@@ -1028,8 +1720,6 @@
                 if (error) {
                     console.error('Error loading orders:', error)
                     showToast('Error loading orders')
-                    // Start polling as fallback
-                    startPolling()
                     return
                 }
 
@@ -1037,11 +1727,6 @@
                 orders = data
                 updateStats()
                 renderOrders()
-
-                // Set the last order ID for polling
-                if (data.length > 0) {
-                    lastOrderId = Math.max(...data.map(order => order.id))
-                }
 
                 // Add existing orders to notifications
                 data.slice(0, 5).forEach(order => {
@@ -1062,94 +1747,7 @@
             } catch (err) {
                 console.error('Failed to load orders:', err)
                 showToast('Failed to load orders')
-                // Start polling as fallback
-                startPolling()
             }
-        }
-
-        // Poll for new orders (fallback method)
-        async function checkForNewOrders() {
-            try {
-                const { data, error } = await supabase
-                    .from('orders')
-                    .select('*')
-                    .gt('id', lastOrderId)
-                    .order('id', { ascending: true })
-
-                if (error) {
-                    console.error('Error polling for new orders:', error)
-                    return
-                }
-
-                if (data && data.length > 0) {
-                    // Process new orders
-                    data.forEach(order => {
-                        orders.unshift(order)
-                        renderNewOrder(order)
-                        lastOrderId = Math.max(lastOrderId, order.id)
-                    })
-                    
-                    updateStats()
-                }
-            } catch (err) {
-                console.error('Error in polling:', err)
-            }
-        }
-
-        function startPolling() {
-            // Clear any existing interval
-            if (pollingInterval) {
-                clearInterval(pollingInterval)
-            }
-            
-            // Check for new orders every 10 seconds
-            pollingInterval = setInterval(checkForNewOrders, 10000)
-            updateConnectionStatus(false)
-        }
-
-        function stopPolling() {
-            if (pollingInterval) {
-                clearInterval(pollingInterval)
-                pollingInterval = null
-            }
-        }
-
-        function setupRealtimeSubscription() {
-            // Remove existing subscription if any
-            if (realtimeSubscription) {
-                supabase.removeChannel(realtimeSubscription)
-            }
-            
-            // Create new real-time subscription
-            realtimeSubscription = supabase
-                .channel('orders')
-                .on('postgres_changes', { 
-                    event: 'INSERT', 
-                    schema: 'public', 
-                    table: 'orders' 
-                }, payload => {
-                    console.log('New order received:', payload.new)
-                    updateConnectionStatus(true)
-
-                    // Add to orders array and update stats
-                    orders.unshift(payload.new)
-                    updateStats()
-
-                    // Update last order ID
-                    lastOrderId = Math.max(lastOrderId, payload.new.id)
-
-                    // Render the new order
-                    renderNewOrder(payload.new)
-                })
-                .subscribe((status) => {
-                    if (status === 'SUBSCRIBED') {
-                        updateConnectionStatus(true)
-                        stopPolling()
-                    } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-                        updateConnectionStatus(false)
-                        startPolling()
-                    }
-                })
         }
 
         // Set up event listeners
@@ -1170,29 +1768,40 @@
                 renderOrders()
             })
             
-            // Retry connection button
-            retryButton.addEventListener('click', () => {
-                setupRealtimeSubscription()
-                showToast('Attempting to reconnect...')
+            // Table header sorting
+            document.querySelectorAll('th[data-sort]').forEach(th => {
+                th.addEventListener('click', () => {
+                    sortOrders(th.getAttribute('data-sort'))
+                })
+            })
+            
+            // Status update button
+            updateStatusBtn.addEventListener('click', () => {
+                if (selectedOrder) {
+                    // This would typically open another modal or form to update status
+                    showToast(`Update status for order #${selectedOrder.id}`)
+                }
             })
         }
 
         // Initialize the dashboard
         loadOrders()
         setupEventListeners()
-        setupRealtimeSubscription()
 
-        // Add offline/online detection
-        window.addEventListener('online', () => {
-            showToast('Connection restored')
-            setupRealtimeSubscription()
-        })
+        // Real-time subscription for new orders
+        supabase
+            .channel('orders')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, payload => {
+                console.log('New order received:', payload.new)
 
-        window.addEventListener('offline', () => {
-            showToast('Connection lost - using fallback updates')
-            updateConnectionStatus(false)
-            startPolling()
-        })
+                // Add to orders array and update stats
+                orders.unshift(payload.new)
+                updateStats()
+
+                // Render the new order
+                renderNewOrder(payload.new)
+            })
+            .subscribe()
     </script>
 </body>
 
