@@ -4,8 +4,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Orders Dashboard</title>
+    <title>Enhanced Live Orders Dashboard</title>
+    <!-- Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary: #FF9F43;
+            --primary-light: #FFE7D6;
+            --secondary: #6C5CE7;
+            --success: #2ECC71;
+            --warning: #F39C12;
+            --danger: #E74C3C;
+            --dark: #2D3436;
+            --light: #F5F6FA;
+            --gray: #858585;
+            --white: #FFFFFF;
+            --card-shadow: 0 6px 15px rgba(0, 0, 0, 0.07);
+            --sidebar-width: 260px;
+            --header-height: 70px;
+            --transition: all 0.3s ease;
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -13,138 +36,365 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            padding: 1.5rem;
-            background: linear-gradient(135deg, #fff8f0 0%, #fef7ed 100%);
+            font-family: 'Poppins', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--light);
             min-height: 100vh;
-            color: #333;
+            color: var(--dark);
+            display: flex;
         }
 
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--white);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            box-shadow: var(--card-shadow);
+            padding: 1.5rem 1rem;
+            z-index: 100;
+            overflow-y: auto;
+            transition: var(--transition);
         }
 
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding: 0 0.5rem;
+        }
+
+        .sidebar-header img {
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.4rem;
+            color: var(--primary);
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            margin-top: 2rem;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 0.8rem;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            color: var(--dark);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .sidebar-menu i {
+            margin-right: 0.8rem;
+            font-size: 1.2rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 1.5rem;
+            transition: var(--transition);
+        }
+
+        /* Header */
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1.5rem;
-            flex-wrap: wrap;
-            gap: 1rem;
-            padding: 1rem;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            padding: 1.2rem;
+            background: var(--white);
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .page-title {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
         }
 
         h1 {
-            color: #e6a900;
+            color: var(--primary);
             margin: 0;
-            font-size: 2.2rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+            font-size: 1.8rem;
         }
 
-        h1 .live-badge {
-            font-size: 0.6rem;
-            background: #ff3333;
-            color: white;
-            padding: 0.3rem 0.6rem;
+        .live-badge {
+            font-size: 0.7rem;
+            background: var(--danger);
+            color: var(--white);
+            padding: 0.3rem 0.8rem;
             border-radius: 20px;
             animation: pulse 1.5s infinite;
         }
 
-        .connection-status {
+        .header-controls {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            background: #f1f8e9;
-            border-radius: 20px;
-            font-weight: 500;
-        }
-
-        .status-indicator {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: #4caf50;
-        }
-
-        .dashboard-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1rem;
-            margin-bottom: 2rem;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            cursor: pointer;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-weight: 600;
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
         }
 
         .stat-card {
-            background: white;
-            padding: 1.2rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            text-align: center;
-            transition: transform 0.3s ease;
+            background: var(--white);
+            padding: 1.5rem;
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
         }
 
         .stat-card:hover {
             transform: translateY(-5px);
         }
 
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: var(--primary);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background: var(--primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 1.5rem;
+        }
+
         .stat-value {
             font-size: 2rem;
             font-weight: 700;
-            color: #e6a900;
-            margin: 0.5rem 0;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
         }
 
         .stat-label {
-            color: #6b6b6b;
+            color: var(--gray);
             font-size: 0.9rem;
         }
 
+        .stat-trend {
+            display: flex;
+            align-items: center;
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .trend-up {
+            color: var(--success);
+        }
+
+        .trend-down {
+            color: var(--danger);
+        }
+
+        /* Charts Container */
+        .charts-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .chart-card {
+            background: var(--white);
+            padding: 1.5rem;
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .chart-title {
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 1.1rem;
+        }
+
+        .chart-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .chart-actions button {
+            padding: 0.4rem 0.8rem;
+            background: var(--light);
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: var(--transition);
+        }
+
+        .chart-actions button.active, .chart-actions button:hover {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 250px;
+            width: 100%;
+        }
+
+        /* Controls */
         .controls {
             display: flex;
             gap: 1rem;
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+            background: var(--white);
+            padding: 1.2rem;
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 0.5rem;
             flex-wrap: wrap;
         }
 
-        .filter-btn {
-            padding: 0.6rem 1.2rem;
-            background: white;
-            border: 1px solid #e6a900;
+        .btn {
+            padding: 0.7rem 1.2rem;
+            background: var(--white);
+            border: 1px solid var(--primary);
             border-radius: 8px;
             cursor: pointer;
             font-weight: 500;
-            transition: all 0.2s ease;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
-        .filter-btn.active {
-            background: #e6a900;
-            color: white;
+        .btn:hover, .btn.active {
+            background: var(--primary);
+            color: var(--white);
         }
 
-        .filter-btn:hover {
-            background: #f8d677;
-            color: white;
+        .btn-primary {
+            background: var(--primary);
+            color: var(--white);
         }
 
         .search-box {
-            padding: 0.6rem 1rem;
-            border: 1px solid #ddd;
-            border-radius: 8px;
+            position: relative;
             flex-grow: 1;
             max-width: 300px;
         }
 
+        .search-input {
+            padding: 0.7rem 1rem 0.7rem 2.8rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            width: 100%;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+        }
+
+        .view-options {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .view-option {
+            padding: 0.6rem;
+            border-radius: 8px;
+            background: var(--white);
+            border: 1px solid #ddd;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .view-option.active, .view-option:hover {
+            background: var(--primary);
+            color: var(--white);
+            border-color: var(--primary);
+        }
+
+        /* Table Container */
         .table-container {
-            background: white;
-            border-radius: 12px;
+            background: var(--white);
+            border-radius: 16px;
             overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            box-shadow: var(--card-shadow);
             margin-bottom: 2rem;
             max-height: 60vh;
             overflow-y: auto;
@@ -155,67 +405,123 @@
             border-collapse: collapse;
         }
 
-        th,
-        td {
-            padding: 1rem;
+        th, td {
+            padding: 1.2rem;
             text-align: left;
+            border-bottom: 1px solid #eee;
         }
 
         th {
-            background: #e6a900;
-            color: #fff;
+            background: var(--primary);
+            color: var(--white);
             font-weight: 600;
             position: sticky;
             top: 0;
+            cursor: pointer;
+        }
+
+        th:hover {
+            background: #FF8C2B;
+        }
+
+        th i {
+            margin-left: 0.3rem;
+            font-size: 0.8rem;
         }
 
         tr:nth-child(even) {
-            background: #fffaf3;
+            background: #FFF9F3;
         }
 
         tr:hover {
-            background: #fff4e0;
+            background: #FFF3E6;
         }
 
         /* Status badges */
         .status-badge {
-            padding: 0.4rem 0.8rem;
+            padding: 0.5rem 1rem;
             border-radius: 20px;
             font-size: 0.85rem;
             font-weight: 500;
             display: inline-block;
             text-align: center;
-            min-width: 90px;
+            min-width: 100px;
         }
 
         .status-pending {
-            background: #ffeed9;
-            color: #e68a00;
+            background: #FFEED9;
+            color: #E68A00;
         }
 
         .status-confirmed {
-            background: #d9f5e8;
-            color: #0c9d58;
+            background: #D9F5E8;
+            color: #0C9D58;
         }
 
         .status-preparing {
-            background: #e0e7ff;
-            color: #4f46e5;
+            background: #E0E7FF;
+            color: #4F46E5;
         }
 
         .status-delivering {
-            background: #e0f2fe;
-            color: #0284c7;
+            background: #E0F2FE;
+            color: #0284C7;
         }
 
         .status-completed {
-            background: #f1f5f9;
-            color: #64748b;
+            background: #F1F5F9;
+            color: #64748B;
         }
 
         .status-cancelled {
-            background: #fee2e2;
-            color: #dc2626;
+            background: #FEE2E2;
+            color: #DC2626;
+        }
+
+        /* Action buttons */
+        .action-btn {
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            background: var(--white);
+            cursor: pointer;
+            margin-right: 0.3rem;
+            transition: var(--transition);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .action-view {
+            color: #4F46E5;
+            border-color: #4F46E5;
+        }
+
+        .action-view:hover {
+            background: #4F46E5;
+            color: var(--white);
+        }
+
+        .action-edit {
+            color: #0C9D58;
+            border-color: #0C9D58;
+        }
+
+        .action-edit:hover {
+            background: #0C9D58;
+            color: var(--white);
+        }
+
+        .action-delete {
+            color: #DC2626;
+            border-color: #DC2626;
+        }
+
+        .action-delete:hover {
+            background: #DC2626;
+            color: var(--white);
         }
 
         /* Highlight animation for new orders */
@@ -225,9 +531,8 @@
 
         @keyframes highlightFade {
             0% {
-                background-color: #fff3c4;
+                background-color: #FFF3C4;
             }
-
             100% {
                 background-color: transparent;
             }
@@ -238,8 +543,8 @@
             position: fixed;
             top: 1rem;
             right: 1rem;
-            background: #e6a900;
-            color: #fff;
+            background: var(--primary);
+            color: var(--white);
             padding: 1rem 1.5rem;
             border-radius: 8px;
             display: none;
@@ -254,7 +559,6 @@
                 opacity: 0;
                 transform: translateY(-10px);
             }
-
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -265,11 +569,9 @@
             0% {
                 opacity: 1;
             }
-
             50% {
                 opacity: 0.6;
             }
-
             100% {
                 opacity: 1;
             }
@@ -286,7 +588,7 @@
             width: 40px;
             height: 40px;
             border: 4px solid #f3f3f3;
-            border-top: 4px solid #e6a900;
+            border-top: 4px solid var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
@@ -295,7 +597,6 @@
             0% {
                 transform: rotate(0deg);
             }
-
             100% {
                 transform: rotate(360deg);
             }
@@ -305,112 +606,355 @@
         footer {
             text-align: center;
             margin-top: 2rem;
-            color: #8a8a8a;
+            color: var(--gray);
             font-size: 0.9rem;
             padding: 1rem;
         }
 
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            color: var(--dark);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray);
+        }
+
         /* Responsive adjustments */
-        @media (max-width: 768px) {
-            body {
-                padding: 1rem;
-            }
-
-            th,
-            td {
-                padding: 0.7rem;
-                font-size: 0.9rem;
-            }
-
-            .dashboard-stats {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .controls {
-                flex-direction: column;
-            }
-
-            .search-box {
-                max-width: 100%;
+        @media (max-width: 1200px) {
+            .charts-container {
+                grid-template-columns: 1fr;
             }
         }
 
-        @media (max-width: 480px) {
-            .dashboard-stats {
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 280px;
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .menu-toggle {
+                display: block;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
                 grid-template-columns: 1fr;
             }
-
-            h1 {
-                font-size: 1.8rem;
+            
+            .controls {
+                flex-direction: column;
+                align-items: flex-start;
             }
+            
+            .search-box {
+                max-width: 100%;
+                width: 100%;
+            }
+            
+            th, td {
+                padding: 0.8rem;
+                font-size: 0.9rem;
+            }
+        }
 
-            .stat-value {
-                font-size: 1.5rem;
+        @media (max-width: 576px) {
+            .main-content {
+                padding: 1rem;
+            }
+            
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            
+            .header-controls {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .filter-group {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .btn {
+                padding: 0.6rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Dark mode toggle */
+        .dark-mode-toggle {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            z-index: 99;
+        }
+
+        /* Menu toggle for mobile */
+        .menu-toggle {
+            display: none;
+            background: var(--primary);
+            color: var(--white);
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            margin-right: 1rem;
+        }
+
+        @media (max-width: 992px) {
+            .menu-toggle {
+                display: flex;
             }
         }
     </style>
 </head>
 
 <body>
-    <div class="container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">🍕</div>
+            <h2>FoodDash</h2>
+        </div>
+        
+        <ul class="sidebar-menu">
+            <li><a href="#" class="active"><i class="fas fa-home"></i> Dashboard</a></li>
+            <li><a href="#"><i class="fas fa-shopping-cart"></i> Orders</a></li>
+            <li><a href="#"><i class="fas fa-utensils"></i> Menu</a></li>
+            <li><a href="#"><i class="fas fa-users"></i> Customers</a></li>
+            <li><a href="#"><i class="fas fa-chart-line"></i> Analytics</a></li>
+            <li><a href="#"><i class="fas fa-cog"></i> Settings</a></li>
+            <li><a href="#"><i class="fas fa-question-circle"></i> Help</a></li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-content">
         <header>
-            <h1>Live Orders Dashboard <span class="live-badge">LIVE</span></h1>
-            <div class="connection-status">
-                <div class="status-indicator"></div>
-                <span>Connected to Real-Time Updates</span>
+            <div class="page-title">
+                <div class="menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </div>
+                <h1>Live Orders Dashboard <span class="live-badge">LIVE</span></h1>
+            </div>
+            
+            <div class="header-controls">
+                <div class="connection-status">
+                    <div class="status-indicator"></div>
+                    <span>Connected to Real-Time Updates</span>
+                </div>
+                
+                <div class="user-profile">
+                    <div class="user-avatar">JD</div>
+                    <div class="user-info">
+                        <div class="user-name">John Doe</div>
+                        <div class="user-role">Administrator</div>
+                    </div>
+                </div>
             </div>
         </header>
 
-        <div class="dashboard-stats">
+        <div class="dashboard-grid">
             <div class="stat-card">
-                <div class="stat-label">TOTAL ORDERS</div>
-                <div class="stat-value" id="total-orders">0</div>
+                <div class="stat-header">
+                    <div>
+                        <div class="stat-label">TOTAL ORDERS</div>
+                        <div class="stat-value" id="total-orders">0</div>
+                    </div>
+                    <div class="stat-icon">
+                        <i class="fas fa-shopping-bag"></i>
+                    </div>
+                </div>
+                <div class="stat-trend trend-up"><i class="fas fa-arrow-up"></i> 12% from yesterday</div>
             </div>
+            
             <div class="stat-card">
-                <div class="stat-label">TODAY'S ORDERS</div>
-                <div class="stat-value" id="today-orders">0</div>
+                <div class="stat-header">
+                    <div>
+                        <div class="stat-label">TODAY'S ORDERS</div>
+                        <div class="stat-value" id="today-orders">0</div>
+                    </div>
+                    <div class="stat-icon">
+                        <i class="fas fa-calendar-day"></i>
+                    </div>
+                </div>
+                <div class="stat-trend trend-up"><i class="fas fa-arrow-up"></i> 5% from yesterday</div>
             </div>
+            
             <div class="stat-card">
-                <div class="stat-label">PENDING ORDERS</div>
-                <div class="stat-value" id="pending-orders">0</div>
+                <div class="stat-header">
+                    <div>
+                        <div class="stat-label">PENDING ORDERS</div>
+                        <div class="stat-value" id="pending-orders">0</div>
+                    </div>
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                </div>
+                <div class="stat-trend trend-down"><i class="fas fa-arrow-down"></i> 3% from yesterday</div>
             </div>
+            
             <div class="stat-card">
-                <div class="stat-label">REVENUE</div>
-                <div class="stat-value" id="total-revenue">LE 0</div>
+                <div class="stat-header">
+                    <div>
+                        <div class="stat-label">REVENUE</div>
+                        <div class="stat-value" id="total-revenue">LE 0</div>
+                    </div>
+                    <div class="stat-icon">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                </div>
+                <div class="stat-trend trend-up"><i class="fas fa-arrow-up"></i> 8% from yesterday</div>
+            </div>
+        </div>
+
+        <div class="charts-container">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title">Orders Over Time</div>
+                    <div class="chart-actions">
+                        <button class="active">Day</button>
+                        <button>Week</button>
+                        <button>Month</button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="orders-chart"></canvas>
+                </div>
+            </div>
+            
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title">Order Status Distribution</div>
+                    <div class="chart-actions">
+                        <button><i class="fas fa-refresh"></i></button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="status-chart"></canvas>
+                </div>
             </div>
         </div>
 
         <div class="controls">
-            <button class="filter-btn active" data-filter="all">All Orders</button>
-            <button class="filter-btn" data-filter="Pending">Pending</button>
-            <button class="filter-btn" data-filter="confirmed">Confirmed</button>
-            <button class="filter-btn" data-filter="preparing">Preparing</button>
-            <button class="filter-btn" data-filter="delivering">Delivering</button>
-            <input type="text" class="search-box" placeholder="Search orders..." id="search-input">
+            <div class="filter-group">
+                <button class="btn active" data-filter="all">
+                    <i class="fas fa-list"></i> All Orders
+                </button>
+                <button class="btn" data-filter="Pending">
+                    <i class="fas fa-clock"></i> Pending
+                </button>
+                <button class="btn" data-filter="confirmed">
+                    <i class="fas fa-check"></i> Confirmed
+                </button>
+                <button class="btn" data-filter="preparing">
+                    <i class="fas fa-utensils"></i> Preparing
+                </button>
+                <button class="btn" data-filter="delivering">
+                    <i class="fas fa-truck"></i> Delivering
+                </button>
+            </div>
+            
+            <div class="search-box">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="search-input" placeholder="Search orders..." id="search-input">
+            </div>
+            
+            <div class="view-options">
+                <button class="view-option active" data-view="table">
+                    <i class="fas fa-table"></i>
+                </button>
+                <button class="view-option" data-view="grid">
+                    <i class="fas fa-th-large"></i>
+                </button>
+            </div>
+            
+            <button class="btn btn-primary" id="export-btn">
+                <i class="fas fa-download"></i> Export
+            </button>
         </div>
 
         <div class="table-container">
             <table>
                 <thead>
                     <tr>
-                        <th>Order ID</th>
-                        <th>Name</th>
-                        <th>Phone</th>
-                        <th>Total (EGP)</th>
+                        <th data-sort="id">Order ID <i class="fas fa-sort"></i></th>
+                        <th data-sort="customer_name">Name <i class="fas fa-sort"></i></th>
+                        <th data-sort="phone">Phone <i class="fas fa-sort"></i></th>
+                        <th data-sort="total">Total (EGP) <i class="fas fa-sort"></i></th>
                         <th>Items</th>
-                        <th>Payment Method</th>
-                        <th>Status</th>
-                        <th>Time</th>
+                        <th data-sort="payment_method">Payment Method <i class="fas fa-sort"></i></th>
+                        <th data-sort="status">Status <i class="fas fa-sort"></i></th>
+                        <th data-sort="created_at">Time <i class="fas fa-sort"></i></th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody id="orders-table">
                     <tr>
-                        <td colspan="8">
+                        <td colspan="9">
                             <div class="loading">
                                 <div class="loading-spinner"></div>
                             </div>
@@ -421,48 +965,88 @@
         </div>
 
         <footer>
-            <p>Automatically updates in real-time • No refresh needed</p>
+            <p>Automatically updates in real-time • No refresh needed • Last updated: <span id="last-updated"></span></p>
         </footer>
     </div>
 
     <!-- Toast notification -->
     <div id="toast">New order received!</div>
 
-    <!-- Audio notification -->
-    <audio id="notification-sound" src="sound.wav" preload="auto"></audio>
+    <!-- Order Detail Modal -->
+    <div class="modal" id="order-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Order Details #<span id="modal-order-id"></span></h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div id="modal-content">
+                <!-- Order details will be inserted here -->
+            </div>
+        </div>
+    </div>
 
+    <!-- Dark Mode Toggle -->
+    <div class="dark-mode-toggle">
+        <i class="fas fa-moon"></i>
+    </div>
+
+    <!-- Audio notification -->
+    <audio id="notification-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-alert-quick-chime-766.mp3" preload="auto"></audio>
 
     <script type="module">
+        // Import Supabase client (using CDN)
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
         const SUPABASE_URL = 'https://kegjyekbrxagrhidvyse.supabase.co'
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlZ2p5ZWticnhhZ3JoaWR2eXNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgxOTYzOTUsImV4cCI6MjA3Mzc3MjM5NX0.Lf_Jz-Q8GUM4XChuNJOJXffA_cGNA2vkgZ-41d08eL8'
+        
+        // Initialize Supabase client
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
-        var channels = supabase;
-
-        console.log("channelschannels", channels)
-
+        // DOM elements
         const tableBody = document.getElementById('orders-table')
         const toast = document.getElementById('toast')
         const sound = document.getElementById('notification-sound')
         const searchInput = document.getElementById('search-input')
-
+        const lastUpdatedEl = document.getElementById('last-updated')
+        const menuToggle = document.querySelector('.menu-toggle')
+        const sidebar = document.querySelector('.sidebar')
+        const darkModeToggle = document.querySelector('.dark-mode-toggle')
+        
         // Stats elements
         const totalOrdersEl = document.getElementById('total-orders')
         const todayOrdersEl = document.getElementById('today-orders')
         const pendingOrdersEl = document.getElementById('pending-orders')
         const totalRevenueEl = document.getElementById('total-revenue')
-
+        
+        // Modal elements
+        const orderModal = document.getElementById('order-modal')
+        const modalOrderId = document.getElementById('modal-order-id')
+        const modalContent = document.getElementById('modal-content')
+        
         // Track orders for stats and filtering
         let orders = []
         let today = new Date().toISOString().split('T')[0]
         let currentFilter = 'all'
         let searchQuery = ''
+        let sortField = 'created_at'
+        let sortDirection = 'desc'
+        let currentView = 'table'
+        
+        // Charts
+        let ordersChart, statusChart
 
-        // Request permission for browser notifications
-        if (Notification.permission !== 'granted') {
-            Notification.requestPermission()
+        // Initialize the dashboard
+        function initDashboard() {
+            loadOrders()
+            setupEventListeners()
+            initCharts()
+            updateLastUpdated()
+            
+            // Request permission for browser notifications
+            if (Notification.permission !== 'granted') {
+                Notification.requestPermission()
+            }
         }
 
         function showToast(message) {
@@ -478,8 +1062,16 @@
 
         function showBrowserNotification(message) {
             if (Notification.permission === 'granted') {
-                new Notification('New Order', { body: message })
+                new Notification('New Order', { 
+                    body: message,
+                    icon: 'https://example.com/icon.png' // Add your icon URL here
+                })
             }
+        }
+        
+        function updateLastUpdated() {
+            const now = new Date()
+            lastUpdatedEl.textContent = now.toLocaleTimeString()
         }
 
         function updateStats() {
@@ -495,12 +1087,121 @@
 
             // Update pending orders
             const pendingOrders = orders.filter(order => order.status === 'Pending')
-            console.log("orders", orders)
             pendingOrdersEl.textContent = pendingOrders.length
 
             // Update total revenue
             const revenue = orders.reduce((sum, order) => sum + order.total, 0)
             totalRevenueEl.textContent = `LE ${revenue.toLocaleString()}`
+            
+            // Update charts
+            updateCharts()
+        }
+        
+        function initCharts() {
+            // Orders over time chart
+            const ordersCtx = document.getElementById('orders-chart').getContext('2d')
+            ordersChart = new Chart(ordersCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Orders',
+                        data: [12, 19, 15, 17, 22, 30, 27],
+                        borderColor: '#FF9F43',
+                        backgroundColor: 'rgba(255, 159, 67, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            })
+            
+            // Status distribution chart
+            const statusCtx = document.getElementById('status-chart').getContext('2d')
+            statusChart = new Chart(statusCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Pending', 'Confirmed', 'Preparing', 'Delivering', 'Completed', 'Cancelled'],
+                    datasets: [{
+                        data: [5, 3, 2, 4, 10, 1],
+                        backgroundColor: [
+                            '#FFEED9',
+                            '#D9F5E8',
+                            '#E0E7FF',
+                            '#E0F2FE',
+                            '#F1F5F9',
+                            '#FEE2E2'
+                        ],
+                        borderColor: [
+                            '#E68A00',
+                            '#0C9D58',
+                            '#4F46E5',
+                            '#0284C7',
+                            '#64748B',
+                            '#DC2626'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20
+                            }
+                        }
+                    }
+                }
+            })
+        }
+        
+        function updateCharts() {
+            // Update status chart with real data
+            if (statusChart) {
+                const statusCounts = {
+                    'Pending': 0,
+                    'confirmed': 0,
+                    'preparing': 0,
+                    'delivering': 0,
+                    'completed': 0,
+                    'cancelled': 0
+                }
+                
+                orders.forEach(order => {
+                    const status = order.status.toLowerCase()
+                    if (statusCounts.hasOwnProperty(status)) {
+                        statusCounts[status]++
+                    }
+                })
+                
+                statusChart.data.datasets[0].data = Object.values(statusCounts)
+                statusChart.update()
+            }
         }
 
         // Format date/time
@@ -544,38 +1245,119 @@
                 return true
             })
         }
+        
+        // Sort orders based on current sort field and direction
+        function sortOrders(ordersList) {
+            return ordersList.sort((a, b) => {
+                let valueA = a[sortField]
+                let valueB = b[sortField]
+                
+                // Handle different data types for sorting
+                if (sortField === 'created_at') {
+                    valueA = new Date(valueA)
+                    valueB = new Date(valueB)
+                }
+                
+                if (valueA < valueB) return sortDirection === 'asc' ? -1 : 1
+                if (valueA > valueB) return sortDirection === 'asc' ? 1 : -1
+                return 0
+            })
+        }
 
         // Render all orders based on current filters
         function renderOrders() {
             const filteredOrders = filterOrders()
+            const sortedOrders = sortOrders([...filteredOrders]) // Create a copy to avoid mutating original
 
-            if (filteredOrders.length === 0) {
+            if (sortedOrders.length === 0) {
                 tableBody.innerHTML = `
-          <tr>
-            <td colspan="8" style="text-align: center; padding: 2rem;">
-              No orders found matching your criteria
-            </td>
-          </tr>
-        `
+                    <tr>
+                        <td colspan="9" style="text-align: center; padding: 2rem;">
+                            No orders found matching your criteria
+                        </td>
+                    </tr>
+                `
                 return
             }
 
             tableBody.innerHTML = ''
 
-            filteredOrders.forEach(order => {
+            sortedOrders.forEach(order => {
                 const row = document.createElement('tr')
                 row.innerHTML = `
-          <td>${order.id}</td>
-          <td>${order.customer_name}</td>
-          <td>${order.phone}</td>
-          <td>LE ${order.total}</td>
-          <td>${order.items ? JSON.parse(order.items).map(i => i.name + ' x' + i.quantity).join('<br>') : '-'}</td>
-          <td>${order.payment_method}</td>
-          <td><span class="status-badge ${getStatusClass(order.status)}">${order.status}</span></td>
-          <td>${formatDateTime(order.created_at)}</td>
-        `
+                    <td>${order.id}</td>
+                    <td>${order.customer_name}</td>
+                    <td>${order.phone}</td>
+                    <td>LE ${order.total}</td>
+                    <td>${order.items ? JSON.parse(order.items).map(i => i.name + ' x' + i.quantity).join('<br>') : '-'}</td>
+                    <td>${order.payment_method}</td>
+                    <td><span class="status-badge ${getStatusClass(order.status)}">${order.status}</span></td>
+                    <td>${formatDateTime(order.created_at)}</td>
+                    <td>
+                        <button class="action-btn action-view" data-id="${order.id}">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="action-btn action-edit" data-id="${order.id}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </td>
+                `
                 tableBody.appendChild(row)
             })
+            
+            // Add event listeners to action buttons
+            document.querySelectorAll('.action-view').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const orderId = e.currentTarget.dataset.id
+                    showOrderDetails(orderId)
+                })
+            })
+            
+            document.querySelectorAll('.action-edit').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const orderId = e.currentTarget.dataset.id
+                    editOrder(orderId)
+                })
+            })
+        }
+        
+        function showOrderDetails(orderId) {
+            const order = orders.find(o => o.id == orderId)
+            if (!order) return
+            
+            modalOrderId.textContent = orderId
+            modalContent.innerHTML = `
+                <div style="margin-bottom: 1.5rem;">
+                    <h3 style="margin-bottom: 0.5rem; color: var(--dark);">Customer Information</h3>
+                    <p><strong>Name:</strong> ${order.customer_name}</p>
+                    <p><strong>Phone:</strong> ${order.phone}</p>
+                    <p><strong>Address:</strong> ${order.address || 'N/A'}</p>
+                </div>
+                
+                <div style="margin-bottom: 1.5rem;">
+                    <h3 style="margin-bottom: 0.5rem; color: var(--dark);">Order Details</h3>
+                    <p><strong>Status:</strong> <span class="status-badge ${getStatusClass(order.status)}">${order.status}</span></p>
+                    <p><strong>Total:</strong> LE ${order.total}</p>
+                    <p><strong>Payment Method:</strong> ${order.payment_method}</p>
+                    <p><strong>Order Time:</strong> ${new Date(order.created_at).toLocaleString()}</p>
+                </div>
+                
+                <div>
+                    <h3 style="margin-bottom: 0.5rem; color: var(--dark);">Items</h3>
+                    <ul>
+                        ${order.items ? JSON.parse(order.items).map(item => 
+                            `<li>${item.name} x${item.quantity} - LE ${item.price * item.quantity}</li>`
+                        ).join('') : '<li>No items</li>'}
+                    </ul>
+                </div>
+            `
+            
+            orderModal.style.display = 'flex'
+        }
+        
+        function editOrder(orderId) {
+            // In a real application, this would open an edit form
+            showToast(`Edit functionality for order #${orderId} would open here`)
         }
 
         // Function to render a single order (for new orders)
@@ -584,15 +1366,23 @@
             const row = document.createElement('tr')
             row.classList.add('highlight')
             row.innerHTML = `
-        <td>${order.id}</td>
-        <td>${order.customer_name}</td>
-        <td>${order.phone}</td>
-        <td>LE ${order.total}</td>
-        <td>${order.items ? JSON.parse(order.items).map(i => i.name + ' x' + i.quantity).join('<br>') : '-'}</td>
-        <td>${order.payment_method}</td>
-        <td><span class="status-badge ${getStatusClass(order.status)}">${order.status}</span></td>
-        <td>${formatDateTime(order.created_at)}</td>
-      `
+                <td>${order.id}</td>
+                <td>${order.customer_name}</td>
+                <td>${order.phone}</td>
+                <td>LE ${order.total}</td>
+                <td>${order.items ? JSON.parse(order.items).map(i => i.name + ' x' + i.quantity).join('<br>') : '-'}</td>
+                <td>${order.payment_method}</td>
+                <td><span class="status-badge ${getStatusClass(order.status)}">${order.status}</span></td>
+                <td>${formatDateTime(order.created_at)}</td>
+                <td>
+                    <button class="action-btn action-view" data-id="${order.id}">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="action-btn action-edit" data-id="${order.id}">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                </td>
+            `
 
             tableBody.prepend(row)
 
@@ -603,8 +1393,11 @@
             const message = `Order #${order.id} from ${order.customer_name}, Total: LE ${order.total}`
             showToast(message)
             playSound()
-            console.log("ssound", sound)
             showBrowserNotification(message)
+            
+            // Add event listeners to the new row's action buttons
+            row.querySelector('.action-view').addEventListener('click', () => showOrderDetails(order.id))
+            row.querySelector('.action-edit').addEventListener('click', () => editOrder(order.id))
         }
 
         // Load existing orders initially
@@ -650,15 +1443,83 @@
                 searchQuery = searchInput.value
                 renderOrders()
             })
+            
+            // Sortable table headers
+            document.querySelectorAll('th[data-sort]').forEach(th => {
+                th.addEventListener('click', () => {
+                    const newSortField = th.dataset.sort
+                    
+                    // If clicking the same field, toggle direction
+                    if (sortField === newSortField) {
+                        sortDirection = sortDirection === 'asc' ? 'desc' : 'asc'
+                    } else {
+                        // If clicking a different field, set to ascending
+                        sortField = newSortField
+                        sortDirection = 'asc'
+                    }
+                    
+                    // Update UI to show current sort
+                    document.querySelectorAll('th i').forEach(icon => {
+                        icon.className = 'fas fa-sort'
+                    })
+                    
+                    th.querySelector('i').className = `fas fa-sort-${sortDirection === 'asc' ? 'up' : 'down'}`
+                    
+                    renderOrders()
+                })
+            })
+            
+            // View options
+            document.querySelectorAll('.view-option').forEach(option => {
+                option.addEventListener('click', () => {
+                    document.querySelectorAll('.view-option').forEach(o => o.classList.remove('active'))
+                    option.classList.add('active')
+                    currentView = option.dataset.view
+                    // In a real app, this would change the view style
+                    showToast(`Switched to ${currentView} view`)
+                })
+            })
+            
+            // Export button
+            document.getElementById('export-btn').addEventListener('click', () => {
+                // In a real app, this would export data
+                showToast('Export functionality would be implemented here')
+            })
+            
+            // Menu toggle for mobile
+            menuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('active')
+            })
+            
+            // Dark mode toggle
+            darkModeToggle.addEventListener('click', () => {
+                document.body.classList.toggle('dark-mode')
+                const icon = darkModeToggle.querySelector('i')
+                if (document.body.classList.contains('dark-mode')) {
+                    icon.className = 'fas fa-sun'
+                    // You would add dark mode styles here
+                } else {
+                    icon.className = 'fas fa-moon'
+                }
+            })
+            
+            // Modal close button
+            document.querySelector('.modal-close').addEventListener('click', () => {
+                orderModal.style.display = 'none'
+            })
+            
+            // Close modal when clicking outside
+            window.addEventListener('click', (e) => {
+                if (e.target === orderModal) {
+                    orderModal.style.display = 'none'
+                }
+            })
         }
 
         // Initialize the dashboard
-        loadOrders()
-        setupEventListeners()
+        initDashboard()
 
-        // Real-time subscription for new orders'
-        console.log('New order received:')
-
+        // Real-time subscription for new orders
         supabase
             .channel('orders')
             .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, payload => {
@@ -667,9 +1528,36 @@
                 // Add to orders array and update stats
                 orders.unshift(payload.new)
                 updateStats()
+                updateLastUpdated()
 
                 // Render the new order
                 renderNewOrder(payload.new)
+            })
+            .subscribe()
+            
+        // Also subscribe to updates and deletes
+        supabase
+            .channel('orders-updates')
+            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders' }, payload => {
+                console.log('Order updated:', payload.new)
+                
+                // Find and update the order
+                const index = orders.findIndex(o => o.id === payload.new.id)
+                if (index !== -1) {
+                    orders[index] = payload.new
+                    updateStats()
+                    renderOrders()
+                    showToast(`Order #${payload.new.id} updated`)
+                }
+            })
+            .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'orders' }, payload => {
+                console.log('Order deleted:', payload.old)
+                
+                // Remove the order
+                orders = orders.filter(o => o.id !== payload.old.id)
+                updateStats()
+                renderOrders()
+                showToast(`Order #${payload.old.id} deleted`)
             })
             .subscribe()
     </script>
