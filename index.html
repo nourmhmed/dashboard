@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -970,7 +971,7 @@
             </div>
             <div class="stat-card" id="revenue-card">
                 <div class="stat-label">REVENUE</div>
-                <div class="stat-value" id="total-revenue">LE 0</div>
+                <div class="stat-value" id="total-revenue">EGP 0</div>
             </div>
         </div>
 
@@ -1396,7 +1397,7 @@
                                 <span>👤</span> ${notification.customer}
                             </span>
                             <span class="notification-detail">
-                                <span>💰</span> LE ${notification.total}
+                                <span>💰</span> EGP ${notification.total}
                             </span>
                             <span class="notification-detail">
                                 <span>📦</span> ${notification.items} item${notification.items !== 1 ? 's' : ''}
@@ -1475,7 +1476,7 @@
 
             // Update total revenue
             const revenue = orders.reduce((sum, order) => sum + order.total, 0)
-            totalRevenueEl.textContent = `LE ${revenue.toLocaleString()}`
+            totalRevenueEl.textContent = `EGP ${revenue.toLocaleString()}`
         }
 
         // Format date/time
@@ -1553,7 +1554,7 @@
                     </div>
                     <div class="order-detail-item">
                         <div class="order-detail-label">Total Amount</div>
-                        <div class="order-detail-value">LE ${order.total}</div>
+                        <div class="order-detail-value">EGP ${order.total}</div>
                     </div>
                     <div class="order-detail-item">
                         <div class="order-detail-label">Payment Method</div>
@@ -1575,7 +1576,7 @@
                 modalBody.innerHTML += `
                     <div class="item-row">
                         <span>${item.name} x${item.quantity}</span>
-                        <span>LE ${item.amount_cents ? (item.amount_cents / 100) * item.quantity : ''}</span>
+                        <span>EGP ${item.amount_cents ? (item.amount_cents / 100) * item.quantity : ''}</span>
                     </div>
                 `;
             
@@ -1667,7 +1668,7 @@
           <td>${order.id}</td>
           <td>${order.customer_name}</td>
           <td>${order.phone}</td>
-          <td>LE ${order.total}</td>
+          <td>EGP ${order.total}</td>
           <td>${order.items ? JSON.parse(order.items).map(i => i.name + ' x' + i.quantity).join('<br>') : '-'}</td>
           <td>${order.payment_method}</td>
           <td><span class="status-badge ${getStatusClass(order.status)}">${order.status}</span></td>
@@ -1698,7 +1699,7 @@
         <td>${order.id}</td>
         <td>${order.customer_name}</td>
         <td>${order.phone}</td>
-        <td>LE ${order.total}</td>
+        <td>EGP ${order.total}</td>
         <td>${order.items ? JSON.parse(order.items).map(i => i.name + ' x' + i.quantity).join('<br>') : '-'}</td>
         <td>${order.payment_method}</td>
         <td><span class="status-badge ${getStatusClass(order.status)}">${order.status}</span></td>
@@ -1726,7 +1727,7 @@
             addNotification(order)
 
             // Trigger notifications for new orders only
-            const message = `Order #${order.id} from ${order.customer_name}, Total: LE ${order.total}`
+            const message = `Order #${order.id} from ${order.customer_name}, Total: EGP ${order.total}`
             showToast(message)
             playSound()
             showBrowserNotification(message)
@@ -1925,9 +1926,3 @@
 </body>
 
 </html>
-
-
-
-
-
-
