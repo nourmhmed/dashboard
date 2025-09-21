@@ -1502,6 +1502,7 @@
 
         // Show order details in modal
         function showOrderDetails(order) {
+            console.log("order", order)
             selectedOrder = order
             const items = order.items ? JSON.parse(order.items) : []
 
@@ -1910,4 +1911,5 @@
 </body>
 
 </html>
+
 
