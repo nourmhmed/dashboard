@@ -1567,7 +1567,8 @@
                 <div class="order-detail-item">
                     <div class="order-detail-label">Items</div>
                     <div class="items-list">
-            `
+            `   
+            console.log("itemsitems", items);
 
             items.forEach(item => {
                 modalBody.innerHTML += `
@@ -1583,7 +1584,7 @@
                 </div>
                 <div class="order-detail-item">
                     <div class="order-detail-label">Delivery Address</div>
-                    <div class="order-detail-value">${order.delivery_address || 'N/A'}</div>
+                    <div class="order-detail-value">${order.address || 'N/A'}</div>
                 </div>
                 <div class="order-detail-item">
                     <div class="order-detail-label">Special Instructions</div>
@@ -1911,5 +1912,6 @@
 </body>
 
 </html>
+
 
 
