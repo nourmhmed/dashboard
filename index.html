@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Live Orders Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --primary: #C0394F;
@@ -36,7 +37,7 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: #f1f5f9;
+            background-color: #f8fafc;
             color: var(--dark);
             line-height: 1.6;
             padding: 1rem;
@@ -329,6 +330,19 @@
             max-width: 300px;
         }
 
+        .status-option.disabled {
+            opacity: 0.5;
+            cursor: not-allowed !important;
+        }
+
+        .status-option.disabled:hover {
+            transform: none !important;
+            box-shadow: none !important;
+            background: white !important;
+            color: var(--gray) !important;
+            border-color: var(--gray-light) !important;
+        }
+
         .search-box {
             padding: 0.6rem 1rem 0.6rem 2.5rem;
             border: 1px solid var(--gray-light);
@@ -451,6 +465,11 @@
             color: #dc2626;
         }
 
+        .status-failed {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
         /* Highlight animation */
         .highlight {
             animation: highlightFade 3s ease;
@@ -534,7 +553,7 @@
             }
         }
 
-        /* Order detail modal */
+        /* Order detail modal - ENHANCED */
         .modal {
             display: none;
             position: fixed;
@@ -542,30 +561,43 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.6);
             z-index: 2000;
             justify-content: center;
             align-items: center;
             backdrop-filter: blur(5px);
+            padding: 20px;
+            animation: modalBgFadeIn 0.3s ease;
+        }
+
+        @keyframes modalBgFadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
 
         .modal-content {
             background: white;
-            border-radius: var(--border-radius);
+            border-radius: 16px;
             width: 90%;
-            max-width: 800px;
+            max-width: 900px;
             max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: var(--shadow-lg);
-            animation: modalFadeIn 0.3s ease;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            animation: modalFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             display: flex;
             flex-direction: column;
+            position: relative;
         }
 
         @keyframes modalFadeIn {
             from {
                 opacity: 0;
-                transform: translateY(-20px) scale(0.95);
+                transform: translateY(30px) scale(0.95);
             }
 
             to {
@@ -579,217 +611,245 @@
             justify-content: space-between;
             align-items: center;
             padding: 1.5rem 2rem;
-            border-bottom: 1px solid var(--gray-light);
-            background: var(--primary);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
             color: white;
-            border-radius: var(--border-radius) var(--border-radius) 0 0;
+            position: relative;
+        }
+
+        .modal-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
         }
 
         .modal-title {
             font-size: 1.5rem;
-            font-weight: 600;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .modal-title::before {
+            content: '📋';
+            font-size: 1.2em;
         }
 
         .close-modal {
-            background: none;
+            background: rgba(255, 255, 255, 0.2);
             border: none;
-            font-size: 1.8rem;
-            cursor: pointer;
-            color: white;
-            transition: var(--transition);
             width: 40px;
             height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 50%;
+            transition: var(--transition);
+            font-size: 1.5rem;
+            color: white;
         }
 
         .close-modal:hover {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
         }
 
         .modal-body {
             padding: 2rem;
             flex: 1;
             overflow-y: auto;
-        }
-
-        .order-details-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+            gap: 2rem;
         }
 
-        .order-detail-item {
+        @media (max-width: 768px) {
+            .modal-body {
+                grid-template-columns: 1fr;
+                padding: 1.5rem;
+                gap: 1.5rem;
+            }
+        }
+
+        .modal-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
             margin-bottom: 1rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--secondary);
         }
 
-        .order-detail-label {
+        .section-title::before {
+            font-size: 1.2em;
+        }
+
+        .order-info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        @media (max-width: 480px) {
+            .order-info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .info-item {
+            margin-bottom: 0.75rem;
+        }
+
+        .info-label {
+            font-size: 0.8rem;
             font-weight: 600;
             color: var(--gray);
-            margin-bottom: 0.5rem;
-            font-size: 0.9rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
         }
 
-        .order-detail-value {
+        .info-value {
             font-size: 1rem;
+            font-weight: 500;
             color: var(--dark);
-            font-weight: 500;
+            padding: 0.5rem 0;
+            word-break: break-word;
         }
 
-        .items-list {
-            margin-top: 1rem;
+        .highlight-value {
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+        }
+
+        /* Items list styling */
+        .items-container {
             background: var(--gray-100);
-            border-radius: var(--border-radius-sm);
-            padding: 1rem;
-        }
-
-        .item-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.75rem 0;
-            border-bottom: 1px solid var(--gray-200);
-        }
-
-        .item-row:last-child {
-            border-bottom: none;
-        }
-
-        .item-name {
-            font-weight: 500;
-        }
-
-        .item-price {
-            color: var(--primary);
-            font-weight: 600;
-        }
-
-        .flavor-row {
-            margin-left: 1.5rem;
-            font-size: 0.9rem;
-            color: var(--gray);
-            padding: 0.25rem 0;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .modal-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 1rem;
-            padding: 1.5rem 2rem;
-            border-top: 1px solid var(--gray-light);
-            background: var(--gray-100);
-            border-radius: 0 0 var(--border-radius) var(--border-radius);
-        }
-
-        .modal-btn {
-            padding: 0.8rem 1.8rem;
-            border: none;
-            border-radius: var(--border-radius-sm);
-            cursor: pointer;
-            font-weight: 600;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
-        }
-
-        .btn-secondary {
-            background: var(--gray-light);
-            color: var(--gray);
-        }
-
-        .btn-secondary:hover {
-            background: var(--gray-300);
-        }
-
-        /* Status update section */
-        .status-update {
-            margin: 2rem 0;
-            padding: 1.5rem;
-            background: var(--gray-100);
-            border-radius: var(--border-radius-sm);
-            border-left: 4px solid var(--primary);
-        }
-
-        .status-update-title {
-            font-weight: 600;
-            margin-bottom: 1rem;
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .status-options {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.75rem;
+            border-radius: 12px;
+            padding: 1.25rem;
             margin-top: 0.5rem;
         }
 
-        .status-option {
-            padding: 0.6rem 1.2rem;
-            border: 1px solid var(--gray-light);
-            border-radius: 20px;
-            cursor: pointer;
+        .item-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
             transition: var(--transition);
-            font-size: 0.9rem;
-            font-weight: 500;
         }
 
-        .status-option:hover {
-            background: var(--gray-light);
+        .item-card:hover {
             transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
-        .status-option.selected {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
         }
 
-        /* Order status progress bar */
+        .item-name {
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .item-quantity {
+            background: var(--primary-light);
+            color: #fff;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .item-details {
+            display: flex;
+            justify-content: space-between;
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .item-price {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .flavor-list {
+            margin-top: 0.5rem;
+            padding-left: 1rem;
+            border-left: 2px solid var(--secondary);
+        }
+
+        .flavor-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            padding: 0.25rem 0;
+            color: var(--gray);
+        }
+
+        /* Status progress section */
+        .status-section {
+            grid-column: 1 / -1;
+            background: var(--gray-100);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .status-progress-container {
+            position: relative;
+            margin: 1.5rem 0;
+        }
+
         .status-progress {
             display: flex;
             justify-content: space-between;
-            margin: 2rem 0;
             position: relative;
+            z-index: 2;
         }
 
         .status-step {
-            width: 36px;
-            height: 36px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             background: var(--gray-light);
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 2;
-            position: relative;
             font-weight: 600;
             color: var(--gray);
+            position: relative;
+            z-index: 2;
+            transition: all 0.3s ease;
         }
 
         .status-step.active {
             background: var(--primary);
             color: white;
-            box-shadow: 0 0 0 4px rgba(192, 57, 79, 0.2);
+            box-shadow: 0 0 0 6px rgba(192, 57, 79, 0.2);
+            transform: scale(1.1);
         }
 
         .status-step.completed {
@@ -799,10 +859,10 @@
 
         .status-progress-line {
             position: absolute;
-            top: 50%;
-            left: 0;
+            top: 30%;
+            left: 20px;
+            right: 20px;
             height: 4px;
-            width: 100%;
             background: var(--gray-light);
             transform: translateY(-50%);
             z-index: 1;
@@ -811,8 +871,8 @@
         .status-progress-fill {
             height: 100%;
             background: var(--success);
-            transition: width 0.5s ease;
             border-radius: 2px;
+            transition: width 0.8s ease;
         }
 
         .status-labels {
@@ -826,8 +886,138 @@
             color: var(--gray);
             text-align: center;
             width: 80px;
-            margin-left: -22px;
+            margin-left: -20px;
             font-weight: 500;
+        }
+
+        .status-label.active {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* Status update section */
+        .status-update-section {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border-left: 4px solid var(--primary);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            margin-top: 1rem;
+        }
+
+        .status-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .status-option {
+            padding: 0.7rem 1.2rem;
+            border: 1px solid var(--gray-light);
+            border-radius: 30px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-option:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .status-option.selected {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(192, 57, 79, 0.2);
+        }
+
+        .status-option[data-status="Pending"]:hover {
+            background: #ffeed9;
+            border-color: #e68a00;
+        }
+
+        .status-option[data-status="confirmed"]:hover {
+            background: #d9f5e8;
+            border-color: #0c9d58;
+        }
+
+        .status-option[data-status="preparing"]:hover {
+            background: #e0e7ff;
+            border-color: #4f46e5;
+        }
+
+        .status-option[data-status="delivering"]:hover {
+            background: #e0f2fe;
+            border-color: #0284c7;
+        }
+
+        .status-option[data-status="completed"]:hover {
+            background: #f1f5f9;
+            border-color: #64748b;
+        }
+
+        .status-option[data-status="cancelled"]:hover {
+            background: #fee2e2;
+            border-color: #dc2626;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            padding: 1.5rem 2rem;
+            background: var(--gray-100);
+            border-top: 1px solid var(--gray-light);
+        }
+
+        @media (max-width: 768px) {
+            .modal-actions {
+                flex-direction: column;
+            }
+        }
+
+        .modal-btn {
+            padding: 0.9rem 2rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            min-width: 140px;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(192, 57, 79, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(192, 57, 79, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--gray);
+            border: 1px solid var(--gray-light);
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray-100);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
         }
 
         /* Footer */
@@ -1080,7 +1270,7 @@
             border-bottom-color: #334155;
         }
 
-        body.dark-mode .items-list,
+        body.dark-mode .items-container,
         body.dark-mode .status-update,
         body.dark-mode .modal-actions {
             background-color: #1e293b;
@@ -1109,6 +1299,87 @@
         body.dark-mode .btn-secondary:hover {
             background-color: #475569;
         }
+
+        /* Dark mode adjustments for modal */
+        body.dark-mode .modal-content {
+            background-color: #1e293b;
+            color: #e2e8f0;
+        }
+
+        body.dark-mode .info-value {
+            color: #e2e8f0;
+        }
+
+        body.dark-mode .item-card {
+            background-color: #0f172a;
+        }
+
+        body.dark-mode .items-container,
+        body.dark-mode .status-section,
+        body.dark-mode .status-update-section {
+            background-color: #0f172a;
+        }
+
+        body.dark-mode .btn-secondary {
+            background-color: #334155;
+            color: #cbd5e1;
+            border-color: #475569;
+        }
+
+        body.dark-mode .btn-secondary:hover {
+            background-color: #475569;
+        }
+
+        /* Animation for status update */
+        @keyframes statusUpdate {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .status-updated {
+            animation: statusUpdate 0.5s ease;
+        }
+
+        /* New order highlight styles */
+        .new-order {
+            background-color: rgba(255, 215, 223, 0.3) !important;
+            /* Light pink background */
+            border-left: 4px solid var(--primary) !important;
+            transition: all 0.3s ease;
+        }
+
+        .new-order:hover {
+            background-color: transparent !important;
+            border-left-color: transparent !important;
+        }
+
+        /* Animation for new orders */
+        @keyframes newOrderPulse {
+            0% {
+                background-color: rgba(255, 215, 223, 0.5);
+            }
+
+            50% {
+                background-color: rgba(255, 215, 223, 0.8);
+            }
+
+            100% {
+                background-color: rgba(255, 215, 223, 0.3);
+            }
+        }
+
+        .new-order-pulse {
+            animation: newOrderPulse 2s ease-in-out 3;
+        }
     </style>
 </head>
 
@@ -1116,7 +1387,7 @@
     <header>
         <h1>Live Orders Dashboard <span class="live-badge">LIVE</span></h1>
     </header>
-    
+
     <div class="container">
         <!-- Notification Panel at the top -->
         <div class="notification-panel" id="notification-panel">
@@ -1174,6 +1445,12 @@
             <button class="filter-btn" data-filter="delivering">
                 <span>🚚</span> Delivering
             </button>
+            <button class="filter-btn" data-filter="failed">
+                <span>⚠️</span> Failed
+            </button>
+            <div class="filter-btn" data-status="cancelled">
+                <span>❌</span> Cancelled
+            </div>
 
             <div class="search-container">
                 <span class="search-icon">🔍</span>
@@ -1212,7 +1489,7 @@
         </footer>
     </div>
 
-    <!-- Order detail modal -->
+    <!-- Enhanced Order detail modal -->
     <div class="modal" id="order-modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -1221,19 +1498,6 @@
             </div>
             <div class="modal-body" id="modal-body">
                 <!-- Order details will be populated here -->
-            </div>
-
-            <!-- Status update section -->
-            <div class="status-update">
-                <div class="status-update-title">📋 Update Order Status</div>
-                <div class="status-options">
-                    <div class="status-option" data-status="Pending">Pending</div>
-                    <div class="status-option" data-status="confirmed">Confirmed</div>
-                    <div class="status-option" data-status="preparing">Preparing</div>
-                    <div class="status-option" data-status="delivering">Delivering</div>
-                    <div class="status-option" data-status="completed">Completed</div>
-                    <div class="status-option" data-status="cancelled">Cancelled</div>
-                </div>
             </div>
 
             <div class="modal-actions">
@@ -1265,17 +1529,13 @@
         <button class="quick-action-btn" id="refresh-btn" title="Refresh orders">
             <span>🔄</span>
         </button>
-        <button class="quick-action-btn" id="clear-search-btn" title="Clear search">
-            <span>❌</span>
-        </button>
         <button class="quick-action-btn" id="export-btn" title="Export data">
             <span>📊</span>
         </button>
     </div>
 
     <!-- Audio notification -->
-    <audio id="notification-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-alarm-tone-996.mp3"
-        preload="auto"></audio>
+    <audio id="notification-sound" src="sound.wav" preload="auto"></audio>
 
     <script type="module">
         // The JavaScript code remains exactly the same as in the original
@@ -1302,7 +1562,6 @@
         const closeModalBtn = document.getElementById('close-modal-btn')
         const updateStatusBtn = document.getElementById('update-status-btn')
         const refreshBtn = document.getElementById('refresh-btn')
-        const clearSearchBtn = document.getElementById('clear-search-btn')
         const exportBtn = document.getElementById('export-btn')
         const statusOptions = document.querySelectorAll('.status-option')
 
@@ -1403,7 +1662,7 @@
             try {
                 // Update the order status in the database
                 console.log("selectedOrder")
-                const { error } = await supabase
+                const { error } = supabase
                     .from('orders')
                     .update({ status: selectedStatus })
                     .eq('id', selectedOrder.id)
@@ -1425,8 +1684,8 @@
                 updateStats()
 
                 // Close the modal and show success message
-                orderModal.style.display = 'none'
                 showToast(`Order #${selectedOrder.id} status updated to ${selectedStatus}`)
+                orderModal.style.display = 'none'
 
                 // Reset status selection
                 statusOptions.forEach(opt => opt.classList.remove('selected'))
@@ -1444,11 +1703,6 @@
             showToast('Orders refreshed')
         })
 
-        clearSearchBtn.addEventListener('click', () => {
-            searchInput.value = ''
-            searchQuery = ''
-            renderOrders()
-        })
 
         exportBtn.addEventListener('click', () => {
             exportOrders()
@@ -1666,11 +1920,18 @@
             totalRevenueEl.textContent = `EGP ${revenue.toLocaleString()}`
         }
 
-        // Format date/time
         function formatDateTime(dateString) {
-            const date = new Date(dateString)
-            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            const date = new Date(dateString);
+            return date.toLocaleString('en-EG', {
+                timeZone: "Africa/Cairo",
+                hour: '2-digit',
+                minute: '2-digit',
+                year: 'numeric',
+                month: 'short',
+                day: '2-digit'
+            });
         }
+
 
         // Get status badge class
         function getStatusClass(status) {
@@ -1683,26 +1944,78 @@
                 case 'delivering': return 'status-delivering';
                 case 'completed': return 'status-completed';
                 case 'cancelled': return 'status-cancelled';
+                case 'failed': return 'status-failed';
                 default: return 'status-pending';
             }
         }
 
+        // Function to reset modal scroll position
+        function resetModalScroll() {
+            console.log("swsw")
+            const modalBody = document.getElementById('modal-body');
+            if (modalBody) {
+                modalBody.scrollTop = 0;
+            }
+        }
 
-        // Show order details in modal
+        // Enhanced showOrderDetails function
         function showOrderDetails(order) {
-            console.log("order", order)
+            // Reset scroll to top immediately after content is set
+            resetModalScroll();
+
+            setTimeout(resetModalScroll, 10);
             selectedOrder = order
             const items = order.items ? JSON.parse(order.items) : []
 
             // Create status progress bar
             const statusSteps = ['Pending', 'confirmed', 'preparing', 'delivering', 'completed']
             const currentStatusIndex = statusSteps.indexOf(order.status.toLowerCase())
+            const isFinalStatus = order.status.toLowerCase() === 'cancel' || order.status.toLowerCase() === 'failed';
+
+
+            // document.querySelectorAll('.status-option').forEach(opt => {
+            //     const optionStatus = opt.getAttribute('data-status').toLowerCase();
+            //     const optionIndex = statusSteps.indexOf(optionStatus);
+
+            //     opt.classList.remove('selected', 'disabled');
+
+            //     if (optionStatus === order.status.toLowerCase()) {
+            //         opt.classList.add('selected');
+            //         selectedStatus = order.status.toLowerCase();
+            //     }
+
+            //     // Disable options that are earlier in the workflow
+            //     if (optionIndex < currentStatusIndex && order.status.toLowerCase() !== 'cancel' && order.status.toLowerCase() !== 'failed') {
+            //         opt.classList.add('disabled');
+            //         opt.style.opacity = '0.5';
+            //         opt.style.cursor = 'not-allowed';
+            //     } else {
+            //         opt.style.opacity = '1';
+            //         opt.style.cursor = 'pointer';
+            //     }
+            // });
+
+            // // Add click event to status options with validation
+            // document.querySelectorAll('.status-option').forEach(opt => {
+            //     opt.addEventListener('click', () => {
+            //         if (opt.classList.contains('disabled')) return;
+
+            //         document.querySelectorAll('.status-option').forEach(option => option.classList.remove('selected'));
+            //         opt.classList.add('selected');
+            //         selectedStatus = opt.getAttribute('data-status');
+            //     });
+            // });
+
+
 
             let progressHTML = `
-                <div class="status-progress">
-                    <div class="status-progress-line">
-                        <div class="status-progress-fill" style="width: ${(currentStatusIndex / (statusSteps.length - 1)) * 100}%"></div>
-                    </div>
+                <div class="status-section">
+                    <div class="section-title">📊 Order Progress</div>
+                    <div class="status-progress-container">
+                        <div class="status-progress-line">
+                            <div class="status-progress-fill" style="width: ${(currentStatusIndex / (statusSteps.length - 1)) * 100}%"></div>
+                        </div>
+                        <div class="status-progress">
             `
 
             statusSteps.forEach((step, index) => {
@@ -1714,94 +2027,185 @@
             })
 
             progressHTML += `
-                </div>
-                <div class="status-labels">
-                    <div class="status-label">Pending</div>
-                    <div class="status-label">Confirmed</div>
-                    <div class="status-label">Preparing</div>
-                    <div class="status-label">Delivering</div>
-                    <div class="status-label">Completed</div>
+                        </div>
+                        <div class="status-labels">
+                            <div class="status-label ${0 === currentStatusIndex ? 'active' : ''}">Pending</div>
+                            <div class="status-label ${1 === currentStatusIndex ? 'active' : ''}">Confirmed</div>
+                            <div class="status-label ${2 === currentStatusIndex ? 'active' : ''}">Preparing</div>
+                            <div class="status-label ${3 === currentStatusIndex ? 'active' : ''}">Delivering</div>
+                            <div class="status-label ${4 === currentStatusIndex ? 'active' : ''}">Completed</div>
+                        </div>
+                    </div>
                 </div>
             `
 
+            // Customer and order info
+            let customerInfoHTML = `
+                <div class="modal-section">
+                    <div class="section-title">👤 Customer Information</div>
+                    <div class="order-info-grid">
+                        <div class="info-item">
+                            <div class="info-label"><span>🆔</span> Order ID</div>
+                            <div class="info-value">#${order.id}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label"><span>👤</span> Customer Name</div>
+                            <div class="info-value">${order.customer_name}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label"><span>📞</span> Phone</div>
+                            <div class="info-value">${order.phone}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label"><span>💰</span> Total Amount</div>
+                            <div class="info-value">EGP ${order.total}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label"><span>💳</span> Payment Method</div>
+                            <div class="info-value">${order.payment_method}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label"><span>🕒</span> Order Time</div>
+                            <div class="info-value">${formatDateTime(order.created_at)}</div>
+                        </div>
+                    </div>
+                </div>
+            `
+
+            // Delivery information
+            let deliveryInfoHTML = `
+                <div class="modal-section">
+                    <div class="section-title">🚚 Delivery Information</div>
+                    <div class="info-item">
+                        <div class="info-label"><span>🏠</span> Delivery Address</div>
+                        <div class="info-value">${order.address || 'N/A'}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label"><span>📝</span> Special Instructions</div>
+                        <div class="info-value">${order.special_instructions || 'None'}</div>
+                    </div>
+                </div>
+            `
+
+            // Order items
+            let itemsHTML = `
+                <div class="modal-section">
+                    <div class="section-title">📦 Order Items</div>
+                    <div class="items-container">
+            `
+
+            if (items.length === 0) {
+                itemsHTML += `<div class="info-value" style="text-align: center; padding: 1rem;">No items in this order</div>`
+            } else {
+                items.forEach(item => {
+                    itemsHTML += `
+                        <div class="item-card">
+                            <div class="item-header">
+                                <div class="item-name">${item.name}</div>
+                                <div class="item-quantity">x${item.quantity}</div>
+                            </div>
+                            <div class="item-details">
+                                <div class="item-price">EGP ${item.amount_cents ? (item.amount_cents / 100) * item.quantity : '0'}</div>
+                            </div>
+                    `
+
+                    // Add flavors if they exist
+                    if (item.flavors && item.flavors.length > 0) {
+                        itemsHTML += `<div class="flavor-list">`
+                        item.flavors.forEach(flavor => {
+                            itemsHTML += `
+                                <div class="flavor-item">
+                                    <span>+ ${flavor.flavor}</span>
+                                    <span>x${flavor.quantity}</span>
+                                </div>
+                            `
+                        })
+                        itemsHTML += `</div>`
+                    }
+
+                    itemsHTML += `</div>`
+                })
+            }
+
+            itemsHTML += `</div></div>`
+
+            // Status update section
+            let statusUpdateHTML = `
+                <div class="status-update-section">
+                    <div class="section-title">🔄 Update Order Status</div>
+                    <div class="status-options">
+                        <div class="status-option" data-status="Pending">
+                            <span>⏳</span> Pending
+                        </div>
+                        <div class="status-option" data-status="confirmed">
+                            <span>✅</span> Confirmed
+                        </div>
+                        <div class="status-option" data-status="preparing">
+                            <span>👨‍🍳</span> Preparing
+                        </div>
+                        <div class="status-option" data-status="delivering">
+                            <span>🚚</span> Delivering
+                        </div>
+                        <div class="status-option" data-status="completed">
+                            <span>🎉</span> Completed
+                        </div>
+                        <div class="status-option" data-status="cancelled">
+                            <span>❌</span> Cancelled
+                        </div>
+                        <div class="status-option" data-status="failed">
+                            <span>⚠️</span> Failed
+                        </div>
+                    </div>
+                </div>
+            `
+
+            // Combine all sections
             modalBody.innerHTML = `
                 ${progressHTML}
-                <div class="order-details-grid">
-                    <div class="order-detail-item">
-                        <div class="order-detail-label">Order ID</div>
-                        <div class="order-detail-value">#${order.id}</div>
-                    </div>
-                    <div class="order-detail-item">
-                        <div class="order-detail-label">Customer Name</div>
-                        <div class="order-detail-value">${order.customer_name}</div>
-                    </div>
-                    <div class="order-detail-item">
-                        <div class="order-detail-label">Phone</div>
-                        <div class="order-detail-value">${order.phone}</div>
-                    </div>
-                    <div class="order-detail-item">
-                        <div class="order-detail-label">Total Amount</div>
-                        <div class="order-detail-value">EGP ${order.total}</div>
-                    </div>
-                    <div class="order-detail-item">
-                        <div class="order-detail-label">Payment Method</div>
-                        <div class="order-detail-value">${order.payment_method}</div>
-                    </div>
-                    <div class="order-detail-item">
-                        <div class="order-detail-label">Order Time</div>
-                        <div class="order-detail-value">${formatDateTime(order.created_at)}</div>
-                    </div>
+                <div>
+                    ${customerInfoHTML}
+                    ${deliveryInfoHTML}
                 </div>
-                <div class="order-detail-item">
-                    <div class="order-detail-label">Items</div>
-                    <div class="items-list">
+                <div>
+                    ${itemsHTML}
+                    ${statusUpdateHTML}
+                </div>
             `
-            console.log("itemsitems", items);
 
-            items.forEach(item => {
-                // main row
-                modalBody.innerHTML += `
-                    <div class="item-row">
-                        <span class="item-name">${item.name} x${item.quantity}</span>
-                        <span class="item-price">EGP ${item.amount_cents ? (item.amount_cents / 100) * item.quantity : ''}</span>
-                    </div>
-                `;
+            document.querySelectorAll('.status-option').forEach(opt => {
+                const optionStatus = opt.getAttribute('data-status').toLowerCase();
+                const optionIndex = statusSteps.indexOf(optionStatus);
+                console.log("optionStatusoptionStatus", currentStatusIndex)
 
-                // flavors (if any)
-                if (item.flavors && item.flavors.length > 0) {
-                    item.flavors.forEach(flavor => {
-                        modalBody.innerHTML += `
-                            <div class="flavor-row">
-                                <span>- ${flavor.flavor} x${flavor.quantity}</span>
-                                <span></span>
-                            </div>
-                        `;
-                    });
+                opt.classList.remove('selected', 'disabled');
+
+                if (optionStatus === order.status.toLowerCase()) {
+                    opt.classList.add('selected');
+                    selectedStatus = order.status.toLowerCase();
                 }
+
+                // Disable options that are earlier in the workflow
+                if (optionIndex < currentStatusIndex && order.status.toLowerCase() !== 'cancel' && order.status.toLowerCase() !== 'failed') {
+                    opt.classList.add('disabled');
+                    opt.style.opacity = '0.5';
+                    opt.style.cursor = 'default';
+                } else {
+                    opt.style.opacity = '1';
+                    opt.style.cursor = 'pointer';
+                }
+
             });
 
+            // Add click event to status options with validation
+            document.querySelectorAll('.status-option').forEach(opt => {
+                opt.addEventListener('click', () => {
+                    if (opt.classList.contains('disabled')) return;
 
-            modalBody.innerHTML += `
-                    </div>
-                </div>
-                <div class="order-detail-item">
-                    <div class="order-detail-label">Delivery Address</div>
-                    <div class="order-detail-value">${order.address || 'N/A'}</div>
-                </div>
-                <div class="order-detail-item">
-                    <div class="order-detail-label">Special Instructions</div>
-                    <div class="order-detail-value">${order.special_instructions || 'None'}</div>
-                </div>
-            `
-
-            // Pre-select the current status
-            statusOptions.forEach(opt => {
-                opt.classList.remove('selected')
-                if (opt.getAttribute('data-status') === order.status) {
-                    opt.classList.add('selected')
-                    selectedStatus = order.status
-                }
-            })
+                    document.querySelectorAll('.status-option').forEach(option => option.classList.remove('selected'));
+                    opt.classList.add('selected');
+                    selectedStatus = opt.getAttribute('data-status');
+                });
+            });
 
             orderModal.style.display = 'flex'
         }
@@ -1839,11 +2243,11 @@
         function renderFilteredOrders(filteredOrders, message) {
             if (filteredOrders.length === 0) {
                 tableBody.innerHTML = `
-          <tr>
-            <td colspan="8" style="text-align: center; padding: 2rem;">
-              ${message || 'No orders found matching your criteria'}
-            </td>
-          </tr>
+            <tr>
+                <td colspan="8" style="text-align: center; padding: 2rem;">
+                    ${message || 'No orders found matching your criteria'}
+                </td>
+            </tr>
         `
                 return
             }
@@ -1852,16 +2256,19 @@
 
             filteredOrders.forEach(order => {
                 const row = document.createElement('tr')
+                // Don't add new-order class for existing orders
+                row.setAttribute('data-order-id', order.id)
                 row.innerHTML = `
-          <td>${order.id}</td>
-          <td>${order.customer_name}</td>
-          <td>${order.phone}</td>
-          <td>EGP ${order.total}</td>
-          <td>${order.items ? JSON.parse(order.items).map(i => i.name + ' x' + i.quantity).join('<br>') : '-'}</td>
-          <td>${order.payment_method}</td>
-          <td><span class="status-badge ${getStatusClass(order.status)}">${order.status}</span></td>
-          <td>${formatDateTime(order.created_at)}</td>
+            <td>${order.id}</td>
+            <td>${order.customer_name}</td>
+            <td>${order.phone}</td>
+            <td>EGP ${order.total}</td>
+            <td>${order.items ? JSON.parse(order.items).map(i => i.name + ' x' + i.quantity).join('<br>') : '-'}</td>
+            <td>${order.payment_method}</td>
+            <td><span class="status-badge ${getStatusClass(order.status)}">${order.status}</span></td>
+            <td>${formatDateTime(order.created_at)}</td>
         `
+
                 // Make row clickable to view details
                 row.addEventListener('click', () => {
                     showOrderDetails(order)
@@ -1878,11 +2285,12 @@
             })
         }
 
-        // Function to render a single order (for new orders)
+        
         function renderNewOrder(order) {
             const filteredOrders = filterOrders()
             const row = document.createElement('tr')
-            row.classList.add('highlight')
+            row.classList.add('highlight', 'new-order', 'new-order-pulse') // Add these classes
+            row.setAttribute('data-order-id', order.id) // Add ID for tracking
             row.innerHTML = `
         <td>${order.id}</td>
         <td>${order.customer_name}</td>
@@ -1892,7 +2300,14 @@
         <td>${order.payment_method}</td>
         <td><span class="status-badge ${getStatusClass(order.status)}">${order.status}</span></td>
         <td>${formatDateTime(order.created_at)}</td>
-      `
+    `
+
+            // Add hover event to remove new-order class
+            row.addEventListener('mouseenter', () => {
+                unreadCount --;
+                console.log("unreadCountunreadCount", unreadCount)
+                row.classList.remove('new-order', 'new-order-pulse')
+            })
 
             // Make row clickable to view details
             row.addEventListener('click', () => {
@@ -1908,8 +2323,10 @@
 
             tableBody.prepend(row)
 
-            // Remove highlight after animation
-            setTimeout(() => row.classList.remove('highlight'), 3000)
+            // Remove highlight after animation, keep new-order class
+            setTimeout(() => {
+                row.classList.remove('highlight', 'new-order-pulse')
+            }, 3000)
 
             // Add notification for the new order
             addNotification(order)
