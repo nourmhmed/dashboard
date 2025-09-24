@@ -1380,6 +1380,15 @@
         .new-order-pulse {
             animation: newOrderPulse 2s ease-in-out 3;
         }
+
+        /* Add to your existing CSS */
+        .status-option:not(.disabled) {
+            transition: all 0.2s ease;
+        }
+
+        .status-option:not(.disabled):active {
+            transform: scale(0.95);
+        }
     </style>
 </head>
 
@@ -1538,8 +1547,6 @@
     <audio id="notification-sound" src="sound.wav" preload="auto"></audio>
 
     <script type="module">
-        // The JavaScript code remains exactly the same as in the original
-        // Only the CSS has been modified for the redesign
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
         const SUPABASE_URL = 'https://kegjyekbrxagrhidvyse.supabase.co'
@@ -1563,7 +1570,6 @@
         const updateStatusBtn = document.getElementById('update-status-btn')
         const refreshBtn = document.getElementById('refresh-btn')
         const exportBtn = document.getElementById('export-btn')
-        const statusOptions = document.querySelectorAll('.status-option')
 
         // Track notifications
         let notifications = []
@@ -1573,7 +1579,12 @@
         let sortDirection = 'desc'
         let selectedOrder = null
         let selectedStatus = null
-        loadOrders()
+
+        // Track orders for stats and filtering
+        let orders = []
+        let today = new Date().toISOString().split('T')[0]
+        let currentFilter = 'all'
+        let searchQuery = ''
 
         // Unlock sound on user interaction
         enableSoundBtn.addEventListener('click', () => {
@@ -1619,27 +1630,18 @@
             themeToggle.innerHTML = '<span>☀️</span>'
         }
 
-        // Status option selection
-        statusOptions.forEach(option => {
-            option.addEventListener('click', () => {
-                statusOptions.forEach(opt => opt.classList.remove('selected'))
-                option.classList.add('selected')
-                selectedStatus = option.getAttribute('data-status')
-            })
-        })
-
         // Modal handlers
         closeModalBtn.addEventListener('click', () => {
             orderModal.style.display = 'none'
             // Reset status selection
-            statusOptions.forEach(opt => opt.classList.remove('selected'))
+            document.querySelectorAll('.status-option').forEach(opt => opt.classList.remove('selected'))
             selectedStatus = null
         })
 
         document.querySelector('.close-modal').addEventListener('click', () => {
             orderModal.style.display = 'none'
             // Reset status selection
-            statusOptions.forEach(opt => opt.classList.remove('selected'))
+            document.querySelectorAll('.status-option').forEach(opt => opt.classList.remove('selected'))
             selectedStatus = null
         })
 
@@ -1647,62 +1649,75 @@
             if (e.target === orderModal) {
                 orderModal.style.display = 'none'
                 // Reset status selection
-                statusOptions.forEach(opt => opt.classList.remove('selected'))
+                document.querySelectorAll('.status-option').forEach(opt => opt.classList.remove('selected'))
                 selectedStatus = null
             }
         })
 
-        // Update status button handler
-        updateStatusBtn.addEventListener('click', async () => {
-            if (!selectedOrder || !selectedStatus) {
+        // Enhanced update status button handler with debugging
+        updateStatusBtn.addEventListener('click', async (e) => {
+            e.stopPropagation(); // Prevent event bubbling
+            console.log("Update button clicked"); // Debug log
+
+            if (!selectedOrder) {
+                console.log("No selected order"); // Debug log
+                showToast('No order selected')
+                return
+            }
+
+            if (!selectedStatus) {
+                console.log("No status selected"); // Debug log
                 showToast('Please select a status')
                 return
             }
 
+            console.log("Updating order:", selectedOrder.id, "to status:", selectedStatus); // Debug log
+
             try {
                 // Update the order status in the database
-                console.log("selectedOrder")
-                const { error } = supabase
+                const { data, error } = await supabase
                     .from('orders')
                     .update({ status: selectedStatus })
                     .eq('id', selectedOrder.id)
+                    .select() // Add this to get the updated data
 
                 if (error) {
-                    console.error('Error updating order status:', error)
-                    showToast('Error updating status')
-                    return
+                    console.error('Error updating order status:', error);
+                    showToast('Error updating status: ' + error.message);
+                    return;
                 }
 
+                console.log("Update response:", data); // Debug log
+
                 // Update the order in the local array
-                const orderIndex = orders.findIndex(o => o.id === selectedOrder.id)
+                const orderIndex = orders.findIndex(o => o.id === selectedOrder.id);
                 if (orderIndex !== -1) {
-                    orders[orderIndex].status = selectedStatus
+                    orders[orderIndex].status = selectedStatus;
                 }
 
                 // Update the UI
-                renderOrders()
-                updateStats()
+                renderOrders();
+                updateStats();
 
                 // Close the modal and show success message
-                showToast(`Order #${selectedOrder.id} status updated to ${selectedStatus}`)
-                orderModal.style.display = 'none'
+                showToast(`Order #${selectedOrder.id} status updated to ${selectedStatus}`);
+                orderModal.style.display = 'none';
 
                 // Reset status selection
-                statusOptions.forEach(opt => opt.classList.remove('selected'))
-                selectedStatus = null
+                document.querySelectorAll('.status-option').forEach(opt => opt.classList.remove('selected'));
+                selectedStatus = null;
 
             } catch (err) {
-                console.error('Failed to update order status:', err)
-                showToast('Failed to update status')
+                console.error('Failed to update order status:', err);
+                showToast('Failed to update status');
             }
-        })
+        });
 
         // Quick actions
         refreshBtn.addEventListener('click', () => {
             loadOrders()
             showToast('Orders refreshed')
         })
-
 
         exportBtn.addEventListener('click', () => {
             exportOrders()
@@ -1750,12 +1765,6 @@
             const sortedByRevenue = [...orders].sort((a, b) => b.total - a.total)
             renderFilteredOrders(sortedByRevenue, "Sorted by Revenue (High to Low)")
         })
-
-        // Track orders for stats and filtering
-        let orders = []
-        let today = new Date().toISOString().split('T')[0]
-        let currentFilter = 'all'
-        let searchQuery = ''
 
         // Request permission for browser notifications
         if (Notification.permission !== 'granted') {
@@ -1932,7 +1941,6 @@
             });
         }
 
-
         // Get status badge class
         function getStatusClass(status) {
             if (!status) return 'status-pending'; // fallback if null or undefined
@@ -1951,7 +1959,6 @@
 
         // Function to reset modal scroll position
         function resetModalScroll() {
-            console.log("swsw")
             const modalBody = document.getElementById('modal-body');
             if (modalBody) {
                 modalBody.scrollTop = 0;
@@ -1971,42 +1978,6 @@
             const statusSteps = ['Pending', 'confirmed', 'preparing', 'delivering', 'completed']
             const currentStatusIndex = statusSteps.indexOf(order.status.toLowerCase())
             const isFinalStatus = order.status.toLowerCase() === 'cancel' || order.status.toLowerCase() === 'failed';
-
-
-            // document.querySelectorAll('.status-option').forEach(opt => {
-            //     const optionStatus = opt.getAttribute('data-status').toLowerCase();
-            //     const optionIndex = statusSteps.indexOf(optionStatus);
-
-            //     opt.classList.remove('selected', 'disabled');
-
-            //     if (optionStatus === order.status.toLowerCase()) {
-            //         opt.classList.add('selected');
-            //         selectedStatus = order.status.toLowerCase();
-            //     }
-
-            //     // Disable options that are earlier in the workflow
-            //     if (optionIndex < currentStatusIndex && order.status.toLowerCase() !== 'cancel' && order.status.toLowerCase() !== 'failed') {
-            //         opt.classList.add('disabled');
-            //         opt.style.opacity = '0.5';
-            //         opt.style.cursor = 'not-allowed';
-            //     } else {
-            //         opt.style.opacity = '1';
-            //         opt.style.cursor = 'pointer';
-            //     }
-            // });
-
-            // // Add click event to status options with validation
-            // document.querySelectorAll('.status-option').forEach(opt => {
-            //     opt.addEventListener('click', () => {
-            //         if (opt.classList.contains('disabled')) return;
-
-            //         document.querySelectorAll('.status-option').forEach(option => option.classList.remove('selected'));
-            //         opt.classList.add('selected');
-            //         selectedStatus = opt.getAttribute('data-status');
-            //     });
-            // });
-
-
 
             let progressHTML = `
                 <div class="status-section">
@@ -2172,10 +2143,10 @@
                 </div>
             `
 
+            // Set up status option event listeners
             document.querySelectorAll('.status-option').forEach(opt => {
                 const optionStatus = opt.getAttribute('data-status').toLowerCase();
                 const optionIndex = statusSteps.indexOf(optionStatus);
-                console.log("optionStatusoptionStatus", currentStatusIndex)
 
                 opt.classList.remove('selected', 'disabled');
 
@@ -2194,16 +2165,26 @@
                     opt.style.cursor = 'pointer';
                 }
 
-            });
+                // Add click event to status options with validation
+                // Add click event to status options with validation
+                opt.addEventListener('click', (e) => {
+                    e.stopPropagation();
 
-            // Add click event to status options with validation
-            document.querySelectorAll('.status-option').forEach(opt => {
-                opt.addEventListener('click', () => {
-                    if (opt.classList.contains('disabled')) return;
+                    if (opt.classList.contains('disabled')) {
+                        console.log("Status option is disabled"); // Debug log
+                        return;
+                    }
 
                     document.querySelectorAll('.status-option').forEach(option => option.classList.remove('selected'));
                     opt.classList.add('selected');
                     selectedStatus = opt.getAttribute('data-status');
+                    console.log("Selected status:", selectedStatus); // Debug log
+
+                    // Visual feedback
+                    opt.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        opt.style.transform = 'scale(1)';
+                    }, 150);
                 });
             });
 
@@ -2285,7 +2266,7 @@
             })
         }
 
-        
+
         function renderNewOrder(order) {
             const filteredOrders = filterOrders()
             const row = document.createElement('tr')
@@ -2304,7 +2285,7 @@
 
             // Add hover event to remove new-order class
             row.addEventListener('mouseenter', () => {
-                unreadCount --;
+                unreadCount--;
                 console.log("unreadCountunreadCount", unreadCount)
                 row.classList.remove('new-order', 'new-order-pulse')
             })
