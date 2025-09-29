@@ -42,12 +42,19 @@
             color: var(--dark);
             line-height: 1.6;
             padding: 1rem;
-            display: flex;
+            display: grid;
+            grid-template-columns: var(--sidebar-width) 1fr;
+            grid-template-rows: auto 1fr;
             gap: 1.5rem;
+            grid-template-areas:
+                "sidebar main"
+                "notifications main";
+            align-items: start;
         }
 
-        /* Sidebar Styles */
+        /* Sidebar positioning */
         .sidebar {
+            grid-area: sidebar;
             width: var(--sidebar-width);
             background: white;
             border-radius: var(--border-radius);
@@ -105,7 +112,12 @@
 
         .main-content {
             flex: 1;
-            max-width: calc(100% - var(--sidebar-width) - 1.5rem);
+            /* max-width: calc(100% - var(--sidebar-width) - 1.5rem); */
+        }
+
+        .main-content {
+            grid-area: main;
+            max-width: 100%;
         }
 
         .container {
@@ -161,19 +173,17 @@
             background: var(--success);
         }
 
-        /* Notification Panel */
+        /* Notification panel positioning */
         .notification-panel {
+            grid-area: notifications;
             background: white;
             border-radius: var(--border-radius);
             box-shadow: var(--shadow);
-            margin-bottom: 1.5rem;
             overflow: hidden;
             max-height: 350px;
             transition: max-height 0.5s ease;
-        }
-
-        .notification-panel.open {
-            max-height: 58px;
+            margin-top: 0;
+            /* Remove any top margin */
         }
 
         .notification-header {
@@ -2222,6 +2232,495 @@
             font-weight: bold;
             font-family: 'Courier New', monospace;
         }
+
+        /* Add to your existing CSS */
+        .voucher-applied {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--success);
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+
+        .voucher-code-display {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            background: var(--secondary);
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            color: var(--primary);
+            display: inline-block;
+        }
+
+        .discount-amount {
+            color: var(--success);
+            font-weight: bold;
+        }
+
+        /* Zone item styles */
+        .zone-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            background: var(--gray-100);
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            border: 1px solid var(--gray-light);
+            transition: var(--transition);
+        }
+
+        .zone-item:hover {
+            background: var(--gray-200);
+            transform: translateY(-1px);
+        }
+
+        .zone-info {
+            flex: 1;
+        }
+
+        .zone-name {
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 0.25rem;
+        }
+
+        .zone-price {
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+
+        .zone-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .empty-zones-message {
+            text-align: center;
+            color: var(--gray);
+            padding: 2rem;
+            font-style: italic;
+        }
+
+        /* Dark mode support */
+        body.dark-mode .zone-item {
+            background: #1e293b;
+            border-color: #334155;
+        }
+
+        body.dark-mode .zone-item:hover {
+            background: #2d3748;
+        }
+
+        /* Infinite Scroll Loading Styles */
+        .loading-more {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            padding: 2rem;
+            text-align: center;
+            color: var(--gray);
+        }
+
+        .loading-more .loading-spinner {
+            width: 30px;
+            height: 30px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .end-of-results {
+            text-align: center;
+            padding: 2rem;
+            color: var(--gray);
+            font-style: italic;
+            border-top: 1px solid var(--gray-light);
+        }
+
+
+        /* Keep your existing notification panel styles, just update positioning */
+        .notification-panel.open {
+            max-height: 58px;
+        }
+
+        .notification-header {
+            padding: 1rem 1.5rem;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .notification-content {
+            padding: 0.5rem;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto 1fr;
+                grid-template-areas:
+                    "sidebar"
+                    "notifications"
+                    "main";
+                gap: 1rem;
+            }
+
+            .sidebar {
+                width: 100%;
+                position: static;
+                margin-bottom: 0;
+            }
+
+            .notification-panel {
+                margin-top: 0;
+            }
+        }
+
+        /* Facebook-style Chat Notification Panel */
+        .notification-panel {
+            grid-area: notifications;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-top: 0;
+            display: flex;
+            flex-direction: column;
+            height: fit-content;
+            max-height: 80px;
+            /* Start collapsed like Facebook chat */
+            transition: max-height 0.3s ease;
+            border: 1px solid #e5e5e5;
+        }
+
+        .notification-panel.open {
+            max-height: 400px;
+            /* Expand when open */
+            /* min-height: 300px; */
+        }
+
+        .notification-header {
+            padding: 1rem 1.5rem;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .notification-header h3 {
+            margin: 0;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+        }
+
+        .notification-header .indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .notification-header .badge {
+            background: var(--danger);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        .notification-content {
+            padding: 0;
+            overflow-y: auto;
+            flex: 1;
+            max-height: 342px;
+            background: #f8f9fa;
+        }
+
+        /* Chat list styling */
+        .chat-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .chat-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            background: white;
+        }
+
+        .chat-item:hover {
+            background-color: #f5f5f5;
+        }
+
+        .chat-item.active {
+            background-color: #e9f0ff;
+            border-left: 3px solid var(--primary);
+        }
+
+        .chat-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            flex-shrink: 0;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .chat-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .chat-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #1c1e21;
+            margin-bottom: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-preview {
+            font-size: 0.8rem;
+            color: #65676b;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chat-time {
+            font-size: 0.7rem;
+            color: #8a8d91;
+            white-space: nowrap;
+        }
+
+        .chat-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+        }
+
+        .status-indicator.pending {
+            background: var(--warning);
+        }
+
+        .status-indicator.new {
+            background: var(--danger);
+            animation: pulse 1.5s infinite;
+        }
+
+        /* Chat actions */
+        .chat-actions {
+            display: flex;
+            padding: 12px 16px;
+            background: white;
+            border-top: 1px solid #f0f0f0;
+            gap: 8px;
+        }
+
+        .chat-action-btn {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #e5e5e5;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .chat-action-btn:hover {
+            background: #f5f5f5;
+            border-color: #d0d0d0;
+        }
+
+        /* Empty state */
+        .chat-empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: #8a8d91;
+        }
+
+        .chat-empty-icon {
+            font-size: 2rem;
+            margin-bottom: 12px;
+            opacity: 0.5;
+        }
+
+        .chat-empty-text {
+            font-size: 0.9rem;
+            margin-bottom: 16px;
+        }
+
+        /* Search in chat */
+        .chat-search {
+            padding: 12px 16px;
+            background: white;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #e5e5e5;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary);
+        }
+
+        /* Animation for new orders */
+        @keyframes highlightChat {
+            0% {
+                background-color: rgba(255, 215, 223, 0.8);
+            }
+
+            100% {
+                background-color: white;
+            }
+        }
+
+        .chat-item.new-order {
+            animation: highlightChat 2s ease;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .notification-panel {
+                margin-top: 0;
+            }
+
+            .notification-panel.open {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 90%;
+                max-width: 400px;
+                height: 70vh;
+                max-height: 70vh;
+                z-index: 1000;
+            }
+
+            .notification-header {
+                padding: 0.8rem 1rem;
+            }
+
+            .chat-item {
+                padding: 10px 12px;
+            }
+        }
+
+        /* Dark mode support */
+        body.dark-mode .notification-panel {
+            background: #1e293b;
+            border-color: #334155;
+        }
+
+        body.dark-mode .notification-content {
+            background: #0f172a;
+        }
+
+        body.dark-mode .chat-item {
+            background: #1e293b;
+            border-bottom-color: #334155;
+        }
+
+        body.dark-mode .chat-item:hover {
+            background-color: #2d3748;
+        }
+
+        body.dark-mode .chat-item.active {
+            background-color: #2d3748;
+        }
+
+        body.dark-mode .chat-name {
+            color: #e2e8f0;
+        }
+
+        body.dark-mode .chat-preview {
+            color: #94a3b8;
+        }
+
+        body.dark-mode .chat-time {
+            color: #64748b;
+        }
+
+        body.dark-mode .chat-actions {
+            background: #1e293b;
+            border-top-color: #334155;
+        }
+
+        body.dark-mode .chat-action-btn {
+            background: #1e293b;
+            border-color: #334155;
+            color: #e2e8f0;
+        }
+
+        body.dark-mode .chat-action-btn:hover {
+            background: #2d3748;
+        }
+
+        body.dark-mode .chat-search {
+            background: #1e293b;
+            border-bottom-color: #334155;
+        }
+
+        body.dark-mode .search-input {
+            background: #0f172a;
+            border-color: #334155;
+            color: #e2e8f0;
+        }
+
+        body.dark-mode .search-input:focus {
+            border-color: var(--primary);
+        }
     </style>
 </head>
 
@@ -2234,6 +2733,7 @@
         <div class="sidebar-tabs">
             <button class="sidebar-tab active" data-tab="orders">
                 <span>📋</span> Orders
+                <span class="badge" id="notification-count">0</span>
             </button>
             <button class="sidebar-tab" data-tab="cookies">
                 <span>🍪</span> Cookies & Boxes
@@ -2241,6 +2741,30 @@
             <button class="sidebar-tab" data-tab="vouchers">
                 <span>🎫</span> Vouchers
             </button>
+            <button class="sidebar-tab" data-tab="shipping">
+                <span>🚚</span> Shipping Prices
+            </button>
+        </div>
+    </div>
+
+    <!-- Notification Panel at the top -->
+    <div class="notification-panel" id="notification-panel">
+        <div class="notification-header" id="notification-header">
+            <h3>
+                <span>📋</span>
+                Recent Orders
+                <span class="badge" id="notification-count">0</span>
+            </h3>
+            <div class="indicator">
+                <span id="notification-indicator-text">No new orders</span>
+                <span class="dropdown-arrow">▼</span>
+            </div>
+        </div>
+        <div class="notification-content" id="notification-list">
+            <!-- Notifications will be added here dynamically -->
+            <div class="notification-item" style="text-align: center; color: #999;">
+                No orders yet
+            </div>
         </div>
     </div>
 
@@ -2253,26 +2777,6 @@
         <div class="container">
             <!-- Orders Tab Content (default) -->
             <div id="orders-tab-content">
-                <!-- Notification Panel at the top -->
-                <div class="notification-panel" id="notification-panel">
-                    <div class="notification-header" id="notification-header">
-                        <h3>
-                            <span>📋</span>
-                            Recent Orders
-                            <span class="badge" id="notification-count">0</span>
-                        </h3>
-                        <div class="indicator">
-                            <span id="notification-indicator-text">No new orders</span>
-                            <span class="dropdown-arrow">▼</span>
-                        </div>
-                    </div>
-                    <div class="notification-content" id="notification-list">
-                        <!-- Notifications will be added here dynamically -->
-                        <div class="notification-item" style="text-align: center; color: #999;">
-                            No orders yet
-                        </div>
-                    </div>
-                </div>
 
                 <div class="dashboard-stats">
                     <div class="stat-card" id="total-orders-card">
@@ -2347,6 +2851,11 @@
                         </tbody>
                     </table>
                 </div>
+                <!-- Add after orders table container -->
+                <div class="loading-more" id="orders-loading" style="display: none;">
+                    <div class="loading-spinner"></div>
+                    <span>Loading more orders...</span>
+                </div>
             </div>
 
             <!-- Cookies & Boxes Tab Content (hidden by default) -->
@@ -2415,6 +2924,11 @@
                             </tr>
                         </tbody>
                     </table>
+                </div>
+                <!-- Add after cookies table container -->
+                <div class="loading-more" id="cookies-loading" style="display: none;">
+                    <div class="loading-spinner"></div>
+                    <span>Loading more items...</span>
                 </div>
             </div>
 
@@ -2490,6 +3004,81 @@
                             </tr>
                         </tbody>
                     </table>
+                </div>
+                <!-- Add after vouchers table container -->
+                <div class="loading-more" id="vouchers-loading" style="display: none;">
+                    <div class="loading-spinner"></div>
+                    <span>Loading more vouchers...</span>
+                </div>
+            </div>
+
+            <!-- Update the shipping prices tab content -->
+            <div id="shipping-tab-content" style="display: none;">
+                <div class="dashboard-stats">
+                    <div class="stat-card">
+                        <div class="stat-label">TOTAL CITIES</div>
+                        <div class="stat-value" id="total-cities">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">TOTAL ZONES</div>
+                        <div class="stat-value" id="total-zones">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">AVG. ZONE PRICE</div>
+                        <div class="stat-value" id="avg-zone-price">EGP 0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">HIGHEST ZONE PRICE</div>
+                        <div class="stat-value" id="highest-zone-price">EGP 0</div>
+                    </div>
+                </div>
+
+                <div class="controls">
+                    <button class="filter-btn active" data-filter-shipping="all">
+                        <span>🏙️</span> All Cities
+                    </button>
+                    <button class="filter-btn" data-filter-shipping="with-zones">
+                        <span>📍</span> Cities with Zones
+                    </button>
+                    <button class="filter-btn" data-filter-shipping="no-zones">
+                        <span>❌</span> Cities without Zones
+                    </button>
+                    <button class="filter-btn" id="add-city-btn">
+                        <span>➕</span> Add City
+                    </button>
+
+                    <div class="search-container">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" class="search-box" placeholder="Search cities..." id="search-shipping-input">
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th data-sort="id">ID ↕</th>
+                                <th data-sort="city">City ↕</th>
+                                <th>Zones</th>
+                                <th>Price Range</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cities-table">
+                            <tr>
+                                <td colspan="5">
+                                    <div class="loading">
+                                        <div class="loading-spinner"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Add after shipping table container -->
+                <div class="loading-more" id="shipping-loading" style="display: none;">
+                    <div class="loading-spinner"></div>
+                    <span>Loading more cities...</span>
                 </div>
             </div>
         </div>
@@ -2641,6 +3230,124 @@
         </div>
     </div>
 
+    <!-- Update the City Modal to include zones management -->
+    <div class="modal" id="city-modal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h2 class="modal-title" id="city-modal-title">Manage City</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="city-form" class="edit-form">
+                    <div class="form-group">
+                        <label for="city-name">City Name:</label>
+                        <input type="text" id="city-name" required>
+                        <small>e.g., "Cairo", "Alexandria", "Giza"</small>
+                    </div>
+
+                    <!-- Zones Section -->
+                    <div class="form-group">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <label style="margin: 0;">Zones:</label>
+                            <button type="button" class="action-btn edit-btn" id="add-zone-btn">
+                                <span>📍</span> Add Zone
+                            </button>
+                        </div>
+
+                        <div id="zones-container"
+                            style="border: 1px solid var(--gray-light); border-radius: 8px; padding: 1rem; max-height: 300px; overflow-y: auto;">
+                            <!-- Zones will be added here dynamically -->
+                            <div style="text-align: center; color: var(--gray); padding: 2rem;">
+                                No zones added yet
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn btn-secondary" id="cancel-city-btn">
+                    <span>✕</span> Cancel
+                </button>
+                <button class="modal-btn btn-primary" id="save-city-btn">
+                    <span>✓</span> Save City
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Zone Edit Modal -->
+    <div class="modal" id="zone-edit-modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2 class="modal-title" id="zone-edit-modal-title">Edit Zone</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="zone-edit-form" class="edit-form">
+                    <div class="form-group">
+                        <label for="edit-zone-name">Zone Name:</label>
+                        <input type="text" id="edit-zone-name" required>
+                        <small>e.g., "Downtown", "Nasr City", "Maadi"</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-zone-price">Price (EGP):</label>
+                        <input type="number" id="edit-zone-price" step="0.01" min="0" required>
+                        <small>Shipping price for this zone</small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn btn-secondary" id="cancel-zone-edit-btn">
+                    <span>✕</span> Cancel
+                </button>
+                <button class="modal-btn btn-primary" id="save-zone-edit-btn">
+                    <span>✓</span> Save Zone
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Zone Modal -->
+    <div class="modal" id="zone-modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2 class="modal-title" id="zone-modal-title">Add Zone</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="zone-form" class="edit-form">
+                    <div class="form-group">
+                        <label for="zone-city">City:</label>
+                        <select id="zone-city" required>
+                            <option value="">Select a city</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="zone-name">Zone Name:</label>
+                        <input type="text" id="zone-name" required>
+                        <small>e.g., "Downtown", "Nasr City", "Maadi"</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="zone-price">Price (EGP):</label>
+                        <input type="number" id="zone-price" step="0.01" min="0" required>
+                        <small>Shipping price for this specific zone</small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn btn-secondary" id="cancel-zone-btn">
+                    <span>✕</span> Cancel
+                </button>
+                <button class="modal-btn btn-primary" id="save-zone-btn">
+                    <span>✓</span> Save Zone
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Audio notification -->
     <audio id="notification-sound" src="sound.wav" preload="auto"></audio>
 
@@ -2650,6 +3357,47 @@
         let GITHUB_USERNAME = '';
         let GITHUB_REPO = '';
         let GITHUB_TOKEN = '';
+        // Update tracking variables
+        let shippingCities = []
+        let shippingZones = []
+        let currentShippingView = 'cities'
+        let shippingSearchQuery = ''
+        let selectedCity = null
+        let selectedZone = null
+        let currentShippingFilter = 'all'
+        let selectedShippingZone = null
+
+        // Infinite scroll state for each tab
+        const infiniteScrollState = {
+            orders: {
+                currentPage: 1,
+                pageSize: 10,
+                hasMore: true,
+                isLoading: false,
+                allData: [] // Store all loaded data
+            },
+            cookies: {
+                currentPage: 1,
+                pageSize: 10,
+                hasMore: true,
+                isLoading: false,
+                allData: []
+            },
+            vouchers: {
+                currentPage: 1,
+                pageSize: 10,
+                hasMore: true,
+                isLoading: false,
+                allData: []
+            },
+            shipping: {
+                currentPage: 1,
+                pageSize: 10,
+                hasMore: true,
+                isLoading: false,
+                allData: []
+            }
+        };
 
         // Vouchers tracking
         let vouchers = []
@@ -2701,6 +3449,7 @@
         const ordersTabContent = document.getElementById('orders-tab-content')
         const cookiesTabContent = document.getElementById('cookies-tab-content')
         const vouchersTabContent = document.getElementById('vouchers-tab-content')
+        const shippingTabContent = document.getElementById('shipping-tab-content')
         const cookiesTable = document.getElementById('cookies-table')
         const searchCookiesInput = document.getElementById('search-cookies-input')
 
@@ -2727,6 +3476,806 @@
         initializeApp();
 
 
+
+        async function loadShippingData(loadMore = false) {
+            const state = infiniteScrollState.shipping;
+
+            if (state.isLoading) return;
+
+            try {
+                state.isLoading = true;
+
+                if (!loadMore) {
+                    state.currentPage = 1;
+                    state.allData = [];
+                } else {
+                    document.getElementById('shipping-loading').style.display = 'flex';
+                }
+
+                const { data: citiesData, error: citiesError } = await supabase
+                    .from('shipping_prices')
+                    .select('*')
+                    .order('id', { ascending: true });
+
+                if (citiesError) {
+                    console.error('Error loading shipping cities:', citiesError);
+                    showToast('Error loading shipping cities');
+                    return;
+                }
+
+                const { data: zonesData, error: zonesError } = await supabase
+                    .from('shipping_zones')
+                    .select(`
+                *,
+                shipping_prices!shipping_zones_city_id_fkey (city)
+            `)
+                    .order('city_id', { ascending: true });
+
+                if (zonesError) {
+                    console.error('Error loading shipping zones:', zonesError);
+                    showToast('Error loading shipping zones');
+                    return;
+                }
+
+                // Apply pagination to cities data
+                const startIndex = (state.currentPage - 1) * state.pageSize;
+                const endIndex = startIndex + state.pageSize;
+                const pageCitiesData = citiesData.slice(startIndex, endIndex);
+
+                state.hasMore = endIndex < citiesData.length;
+
+                if (loadMore) {
+                    state.allData = [...state.allData, ...pageCitiesData];
+                } else {
+                    state.allData = pageCitiesData;
+                }
+
+                state.currentPage++;
+
+                shippingCities = state.allData;
+                shippingZones = zonesData;
+
+                updateShippingStats();
+                renderShippingViews();
+
+                document.getElementById('shipping-loading').style.display = 'none';
+
+                if (!state.hasMore && state.allData.length > 0) {
+                    const existingEndMessage = document.getElementById('shipping-end-message');
+                    if (!existingEndMessage) {
+                        const endMessage = document.createElement('div');
+                        endMessage.id = 'shipping-end-message';
+                        endMessage.className = 'end-of-results';
+                        endMessage.textContent = 'No more cities to load';
+                        document.getElementById('shipping-tab-content').appendChild(endMessage);
+                    }
+                }
+
+            } catch (err) {
+                console.error('Failed to load shipping data:', err);
+                showToast('Failed to load shipping data');
+            } finally {
+                state.isLoading = false;
+            }
+        }
+
+        // Scroll detection for infinite scroll
+        function setupInfiniteScroll() {
+            const tableContainers = document.querySelectorAll('.table-container');
+
+            tableContainers.forEach(container => {
+                container.addEventListener('scroll', function () {
+                    // Check if scrolled to bottom (within 100px)
+                    const scrollTop = this.scrollTop;
+                    const scrollHeight = this.scrollHeight;
+                    const clientHeight = this.clientHeight;
+
+                    if (scrollHeight - scrollTop - clientHeight < 100) {
+                        // Determine which tab is active and load more data
+                        if (ordersTabContent.style.display !== 'none') {
+                            if (infiniteScrollState.orders.hasMore && !infiniteScrollState.orders.isLoading) {
+                                loadOrders(true);
+                            }
+                        } else if (cookiesTabContent.style.display !== 'none') {
+                            if (infiniteScrollState.cookies.hasMore && !infiniteScrollState.cookies.isLoading) {
+                                loadCookies(true);
+                            }
+                        } else if (vouchersTabContent.style.display !== 'none') {
+                            if (infiniteScrollState.vouchers.hasMore && !infiniteScrollState.vouchers.isLoading) {
+                                loadVouchers(true);
+                            }
+                        } else if (shippingTabContent.style.display !== 'none') {
+                            if (infiniteScrollState.shipping.hasMore && !infiniteScrollState.shipping.isLoading) {
+                                loadShippingData(true);
+                            }
+                        }
+                    }
+                });
+            });
+        }
+
+        // Initialize infinite scroll
+        setupInfiniteScroll();
+
+        function updateShippingStats() {
+            const totalCitiesEl = document.getElementById('total-cities')
+            const totalZonesEl = document.getElementById('total-zones')
+            const avgZonePriceEl = document.getElementById('avg-zone-price')
+            const highestZonePriceEl = document.getElementById('highest-zone-price')
+
+            totalCitiesEl.textContent = shippingCities.length
+            totalZonesEl.textContent = shippingZones.length
+
+            if (shippingZones.length > 0) {
+                const prices = shippingZones.map(zone => parseFloat(zone.price))
+                const avgPrice = prices.reduce((sum, price) => sum + price, 0) / prices.length
+                const highestPrice = Math.max(...prices)
+
+                avgZonePriceEl.textContent = `EGP ${avgPrice.toFixed(2)}`
+                highestZonePriceEl.textContent = `EGP ${highestPrice.toFixed(2)}`
+            } else {
+                avgZonePriceEl.textContent = 'EGP 0'
+                highestZonePriceEl.textContent = 'EGP 0'
+            }
+        }
+
+        function renderShippingViews() {
+            if (currentShippingView === 'cities') {
+                renderCitiesView()
+            } else {
+                renderZonesView()
+            }
+        }
+
+        // Update the renderCitiesView function
+        function renderCitiesView() {
+            const citiesTable = document.getElementById('cities-table')
+            const filteredCities = filterCities()
+
+            if (filteredCities.length === 0) {
+                citiesTable.innerHTML = `
+            <tr>
+                <td colspan="5" style="text-align: center; padding: 2rem;">
+                    No cities found matching your criteria
+                </td>
+            </tr>
+        `
+                return
+            }
+
+            citiesTable.innerHTML = ''
+
+
+            filteredCities.forEach(city => {
+                const row = document.createElement('tr')
+
+                // Get zones for this city
+                const cityZones = shippingZones.filter(zone => zone.city_id === city.id)
+                const zonesCount = cityZones.length
+
+                // Calculate price range
+                let priceRange = 'No zones'
+                if (zonesCount > 0) {
+                    const prices = cityZones.map(zone => parseFloat(zone.price))
+                    const minPrice = Math.min(...prices)
+                    const maxPrice = Math.max(...prices)
+                    priceRange = minPrice === maxPrice ?
+                        `EGP ${minPrice.toFixed(2)}` :
+                        `EGP ${minPrice.toFixed(2)} - EGP ${maxPrice.toFixed(2)}`
+                }
+
+                // Format zones display
+                let zonesDisplay = 'No zones'
+                if (zonesCount > 0) {
+                    if (zonesCount <= 3) {
+                        zonesDisplay = cityZones.map(zone => `
+                    <div style="display: inline-block; background: var(--secondary); padding: 0.2rem 0.5rem; border-radius: 4px; margin: 0.1rem; font-size: 0.8rem;">
+                        ${zone.zone_name} (EGP ${parseFloat(zone.price).toFixed(2)})
+                    </div>
+                `).join('')
+                    } else {
+                        zonesDisplay = `
+                    <div style="display: inline-block; background: var(--primary-light); color: var(--primary); padding: 0.2rem 0.5rem; border-radius: 4px; margin: 0.1rem; font-size: 0.8rem;">
+                        ${zonesCount} zones
+                    </div>
+                `
+                    }
+                }
+
+                row.innerHTML = `
+            <td>${city.id}</td>
+            <td><strong>${city.city}</strong></td>
+            <td>${zonesDisplay}</td>
+            <td>${priceRange}</td>
+            <td>
+                <button class="action-btn edit-btn" data-id="${city.id}" data-type="city">Manage</button>
+                <button class="action-btn delete-btn" data-id="${city.id}" data-type="city">Delete</button>
+            </td>
+        `
+
+                // Add event listeners
+                row.querySelector('.edit-btn').addEventListener('click', (e) => {
+                    e.stopPropagation()
+                    editCity(city.id)
+                })
+
+                row.querySelector('.delete-btn').addEventListener('click', (e) => {
+                    e.stopPropagation()
+                    deleteCity(city.id, city.city)
+                })
+
+                citiesTable.appendChild(row)
+            })
+        }
+
+        function renderZonesView() {
+            const zonesTable = document.getElementById('zones-table')
+            const filteredZones = filterZones()
+
+            if (filteredZones.length === 0) {
+                zonesTable.innerHTML = `
+            <tr>
+                <td colspan="5" style="text-align: center; padding: 2rem;">
+                    No zones found matching your criteria
+                </td>
+            </tr>
+        `
+                return
+            }
+
+            zonesTable.innerHTML = ''
+
+            filteredZones.forEach(zone => {
+                const row = document.createElement('tr')
+
+                // Get city name from the nested relationship
+                const cityName = zone.shipping_prices?.city || 'Unknown'
+
+                row.innerHTML = `
+            <td>${zone.id}</td>
+            <td><strong>${cityName}</strong></td>
+            <td>${zone.zone_name}</td>
+            <td>EGP ${parseFloat(zone.price).toFixed(2)}</td>
+            <td>
+                <button class="action-btn edit-btn" data-id="${zone.id}" data-type="zone">Edit</button>
+                <button class="action-btn delete-btn" data-id="${zone.id}" data-type="zone">Delete</button>
+            </td>
+        `
+
+                // Add event listeners
+                row.querySelector('.edit-btn').addEventListener('click', (e) => {
+                    e.stopPropagation()
+                    editZone(zone.id)
+                })
+
+                row.querySelector('.delete-btn').addEventListener('click', (e) => {
+                    e.stopPropagation()
+                    deleteZone(zone.id, zone.zone_name)
+                })
+
+                zonesTable.appendChild(row)
+            })
+        }
+
+        // Update the filterCities function
+        function filterCities() {
+            return shippingCities.filter(city => {
+                // Apply status filter
+                const cityZones = shippingZones.filter(zone => zone.city_id === city.id)
+
+                if (currentShippingFilter === 'with-zones' && cityZones.length === 0) {
+                    return false
+                }
+                if (currentShippingFilter === 'no-zones' && cityZones.length > 0) {
+                    return false
+                }
+
+                // Apply search filter
+                if (shippingSearchQuery) {
+                    const searchTerm = shippingSearchQuery.toLowerCase()
+                    return city.city.toLowerCase().includes(searchTerm)
+                }
+
+                return true
+            })
+        }
+
+        function filterZones() {
+            return shippingZones.filter(zone => {
+                if (shippingSearchQuery) {
+                    const searchTerm = shippingSearchQuery.toLowerCase()
+                    const cityName = zone.shipping_prices?.city || ''
+                    return (
+                        cityName.toLowerCase().includes(searchTerm) ||
+                        zone.zone_name.toLowerCase().includes(searchTerm)
+                    )
+                }
+                return true
+            })
+        }
+
+        // Update the showCityModal function to use the new modal system
+        function showCityModal(city = null) {
+            selectedCity = city;
+            console.log("selectedCity", selectedCity)
+            const modal = document.getElementById('city-modal');
+            const title = document.getElementById('city-modal-title');
+            const zonesContainer = document.getElementById('zones-container');
+
+            if (city) {
+                title.textContent = `Manage City: ${city.city}`;
+                document.getElementById('city-name').value = city.city;
+
+                // Load and display zones for this city
+                const cityZones = shippingZones.filter(zone => zone.city_id === city.id);
+                console.log("cityZones", cityZones)
+                renderZonesInModal(cityZones);
+            } else {
+                title.textContent = 'Add New City';
+                document.getElementById('city-form').reset();
+                zonesContainer.innerHTML = `
+                <div class="empty-zones-message">
+                    No zones added yet
+                </div>
+            `;
+            }
+
+            // Setup add zone button to use modal
+            const addZoneBtn = document.getElementById('add-zone-btn');
+            addZoneBtn.onclick = () => showZoneEditModal();
+
+            modal.style.display = 'flex';
+        }
+        // Function to add a new zone in the modal
+        function addZoneToModal(zone = null, zoneIndex = null) {
+            const zoneName = prompt('Enter zone name:')
+            if (!zoneName) return
+
+            const zonePrice = parseFloat(prompt('Enter zone price (EGP):'))
+            if (isNaN(zonePrice) || zonePrice < 0) {
+                showToast('Please enter a valid price')
+                return
+            }
+
+            const zonesContainer = document.getElementById('zones-container')
+
+            // Remove "no zones" message if it exists
+            if (zonesContainer.querySelector('div[style*="text-align: center"]')) {
+                zonesContainer.innerHTML = ''
+            }
+
+            const newZoneHTML = `
+        <div class="zone-item" data-zone-index="${zoneIndex || Date.now()}" style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: var(--gray-100); border-radius: 6px; margin-bottom: 0.5rem;">
+            <div style="flex: 1;">
+                <div style="font-weight: 600;">${zoneName}</div>
+                <div style="font-size: 0.8rem; color: var(--gray);">EGP ${zonePrice.toFixed(2)}</div>
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+                <button type="button" class="action-btn edit-btn edit-zone-btn" data-zone-index="${zoneIndex || Date.now()}">
+                    Edit
+                </button>
+                <button type="button" class="action-btn delete-btn delete-zone-btn" data-zone-index="${zoneIndex || Date.now()}">
+                    Delete
+                </button>
+            </div>
+        </div>
+    `
+
+            if (zoneIndex !== null) {
+                // Replace existing zone
+                const existingZone = zonesContainer.querySelector(`[data-zone-index="${zoneIndex}"]`)
+                if (existingZone) {
+                    existingZone.outerHTML = newZoneHTML
+                }
+            } else {
+                // Add new zone
+                zonesContainer.innerHTML += newZoneHTML
+            }
+
+            // Re-attach event listeners
+            const newZoneElement = zonesContainer.querySelector(`[data-zone-index="${zoneIndex || Date.now()}"]`)
+            if (newZoneElement) {
+                newZoneElement.querySelector('.edit-zone-btn').addEventListener('click', (e) => {
+                    const index = parseInt(e.target.dataset.zoneIndex)
+                    const zoneName = newZoneElement.querySelector('div:first-child div:first-child').textContent
+                    const zonePrice = parseFloat(newZoneElement.querySelector('div:first-child div:last-child').textContent.replace('EGP ', ''))
+                    editZoneInModal({ zone_name: zoneName, price: zonePrice }, index)
+                })
+
+                newZoneElement.querySelector('.delete-zone-btn').addEventListener('click', (e) => {
+                    const index = parseInt(e.target.dataset.zoneIndex)
+                    deleteZoneFromModal(index)
+                })
+            }
+        }
+
+
+
+        // Update the renderZonesInModal function
+        function renderZonesInModal(zones) {
+            const zonesContainer = document.getElementById('zones-container');
+
+            if (zones.length === 0) {
+                zonesContainer.innerHTML = `
+            <div class="empty-zones-message">
+                No zones added yet
+            </div>
+        `;
+                return;
+            }
+
+            zonesContainer.innerHTML = zones.map((zone, index) => `
+        <div class="zone-item" data-zone-index="${index}" data-zone-name="${zone.zone_name}" data-zone-price="${zone.price}">
+            <div class="zone-info">
+                <div class="zone-name">${zone.zone_name}</div>
+                <div class="zone-price">EGP ${parseFloat(zone.price).toFixed(2)}</div>
+            </div>
+            <div class="zone-actions">
+                <button type="button" class="action-btn edit-btn edit-zone-modal-btn">
+                    Edit
+                </button>
+                <button type="button" class="action-btn delete-btn delete-zone-btn">
+                    Delete
+                </button>
+            </div>
+        </div>
+    `).join('');
+
+            // Add event listeners
+            attachZoneEventListeners();
+        }
+
+
+
+        // Function to edit a zone in the modal
+        function editZoneInModal(zone, zoneIndex) {
+            const newZoneName = prompt('Enter new zone name:', zone.zone_name)
+            if (!newZoneName) return
+
+            const newZonePrice = parseFloat(prompt('Enter new zone price (EGP):', zone.price))
+            if (isNaN(newZonePrice) || newZonePrice < 0) {
+                showToast('Please enter a valid price')
+                return
+            }
+
+            addZoneToModal({ zone_name: newZoneName, price: newZonePrice }, zoneIndex)
+        }
+
+        // Add modal event listeners for the zone edit modal
+        function setupZoneEditModalEvents() {
+            const zoneEditModal = document.getElementById('zone-edit-modal');
+            const cancelBtn = document.getElementById('cancel-zone-edit-btn');
+            const saveBtn = document.getElementById('save-zone-edit-btn');
+            const closeBtn = zoneEditModal.querySelector('.close-modal');
+
+            const closeModal = () => {
+                zoneEditModal.style.display = 'none';
+            };
+
+            cancelBtn.addEventListener('click', closeModal);
+            closeBtn.addEventListener('click', closeModal);
+            saveBtn.addEventListener('click', saveZoneFromModal);
+
+            zoneEditModal.addEventListener('click', (e) => {
+                if (e.target === zoneEditModal) {
+                    closeModal();
+                }
+            });
+
+            // Allow Enter key to save
+            zoneEditModal.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    saveZoneFromModal();
+                }
+            });
+        }
+
+
+        async function saveCity() {
+            try {
+                const cityName = document.getElementById('city-name').value.trim();
+
+                if (!cityName) {
+                    showToast('City name is required');
+                    return;
+                }
+
+                // Collect zones from the modal
+                const zonesContainer = document.getElementById('zones-container');
+                const zoneElements = zonesContainer.querySelectorAll('.zone-item:not(.empty-zones-message)');
+                const zonesData = [];
+
+                zoneElements.forEach(zoneElement => {
+                    // Get data from the data attributes we set
+                    const zoneName = zoneElement.dataset.zoneName;
+                    const zonePrice = parseFloat(zoneElement.dataset.zonePrice);
+
+                    if (zoneName && !isNaN(zonePrice)) {
+                        zonesData.push({
+                            zone_name: zoneName,
+                            price: zonePrice
+                        });
+                    }
+                });
+
+                console.log('Saving city with zones:', { cityName, zonesData });
+
+                let error;
+                if (selectedCity) {
+                    // Update existing city
+                    const { error: updateError } = await supabase
+                        .from('shipping_prices')
+                        .update({ city: cityName })
+                        .eq('id', selectedCity.id);
+                    error = updateError;
+
+                    if (!error) {
+                        // Delete existing zones and insert new ones
+                        const { error: deleteError } = await supabase
+                            .from('shipping_zones')
+                            .delete()
+                            .eq('city_id', selectedCity.id);
+
+                        if (!deleteError && zonesData.length > 0) {
+                            const zonesToInsert = zonesData.map(zone => ({
+                                city_id: selectedCity.id,
+                                zone_name: zone.zone_name,
+                                price: zone.price
+                            }));
+
+                            const { error: insertError } = await supabase
+                                .from('shipping_zones')
+                                .insert(zonesToInsert);
+                            error = insertError;
+                        }
+                    }
+                } else {
+                    // Create new city
+                    const { data: newCity, error: insertCityError } = await supabase
+                        .from('shipping_prices')
+                        .insert([{ city: cityName }])
+                        .select()
+                        .single();
+                    error = insertCityError;
+
+                    if (!error && newCity && zonesData.length > 0) {
+                        const zonesToInsert = zonesData.map(zone => ({
+                            city_id: newCity.id,
+                            zone_name: zone.zone_name,
+                            price: zone.price
+                        }));
+
+                        const { error: insertZonesError } = await supabase
+                            .from('shipping_zones')
+                            .insert(zonesToInsert);
+                        error = insertZonesError;
+                    }
+                }
+
+                if (error) {
+                    console.error('Error saving city:', error);
+                    showToast('Error saving city: ' + error.message);
+                    return;
+                }
+
+                showToast(`City ${selectedCity ? 'updated' : 'created'} successfully`);
+                document.getElementById('city-modal').style.display = 'none';
+                loadShippingData();
+
+            } catch (err) {
+                console.error('Failed to save city:', err);
+                showToast('Failed to save city');
+            }
+        }
+
+        // Add this function to debug the current zones
+        function debugCurrentZones() {
+            const zonesContainer = document.getElementById('zones-container');
+            const zoneElements = zonesContainer.querySelectorAll('.zone-item');
+            console.log('Current zones in modal:', zoneElements.length);
+
+            zoneElements.forEach((zone, index) => {
+                console.log(`Zone ${index}:`, {
+                    name: zone.dataset.zoneName,
+                    price: zone.dataset.zonePrice,
+                    element: zone
+                });
+            });
+        }
+
+        // Call this in your saveCity function temporarily to debug
+        // Add this line at the beginning of saveCity function:
+        console.log('=== DEBUG: Starting saveCity ===');
+        debugCurrentZones();
+
+        async function deleteCity(id, cityName) {
+            if (confirm(`Are you sure you want to delete city "${cityName}"? This will also delete all zones in this city.`)) {
+                try {
+                    const { error } = await supabase
+                        .from('shipping_prices')
+                        .delete()
+                        .eq('id', id)
+
+                    if (error) {
+                        console.error('Error deleting city:', error)
+                        showToast('Error deleting city')
+                        return
+                    }
+
+                    showToast('City deleted successfully')
+                    loadShippingData()
+
+                } catch (err) {
+                    console.error('Failed to delete city:', err)
+                    showToast('Failed to delete city')
+                }
+            }
+        }
+
+        // Zone CRUD operations
+        async function showZoneModal(zone = null) {
+            selectedZone = zone
+            const modal = document.getElementById('zone-modal')
+            const title = document.getElementById('zone-modal-title')
+            const citySelect = document.getElementById('zone-city')
+
+            // Populate cities dropdown
+            citySelect.innerHTML = '<option value="">Select a city</option>'
+            shippingCities.forEach(city => {
+                const option = document.createElement('option')
+                option.value = city.id
+                option.textContent = city.city
+                citySelect.appendChild(option)
+            })
+
+            if (zone) {
+                title.textContent = `Edit Zone: ${zone.zone_name}`
+                document.getElementById('zone-city').value = zone.city_id
+                document.getElementById('zone-name').value = zone.zone_name
+                document.getElementById('zone-price').value = zone.price
+            } else {
+                title.textContent = 'Add New Zone'
+                document.getElementById('zone-form').reset()
+            }
+
+            modal.style.display = 'flex'
+        }
+
+        async function saveZone() {
+            try {
+                const cityId = parseInt(document.getElementById('zone-city').value)
+                const zoneName = document.getElementById('zone-name').value.trim()
+                const price = parseFloat(document.getElementById('zone-price').value) || 0
+
+                if (!cityId) {
+                    showToast('Please select a city')
+                    return
+                }
+
+                if (!zoneName) {
+                    showToast('Zone name is required')
+                    return
+                }
+
+                if (price < 0) {
+                    showToast('Price cannot be negative')
+                    return
+                }
+
+                const zoneData = {
+                    city_id: cityId,
+                    zone_name: zoneName,
+                    price: price
+                }
+
+                let error
+                if (selectedZone) {
+                    const { error: updateError } = await supabase
+                        .from('shipping_zones')
+                        .update(zoneData)
+                        .eq('id', selectedZone.id)
+                    error = updateError
+                } else {
+                    const { error: insertError } = await supabase
+                        .from('shipping_zones')
+                        .insert([zoneData])
+                    error = insertError
+                }
+
+                if (error) {
+                    console.error('Error saving zone:', error)
+                    showToast('Error saving zone: ' + error.message)
+                    return
+                }
+
+                showToast(`Zone ${selectedZone ? 'updated' : 'created'} successfully`)
+                document.getElementById('zone-modal').style.display = 'none'
+                loadShippingData()
+
+            } catch (err) {
+                console.error('Failed to save zone:', err)
+                showToast('Failed to save zone')
+            }
+        }
+
+        async function deleteZone(id, zoneName) {
+            if (confirm(`Are you sure you want to delete zone "${zoneName}"?`)) {
+                try {
+                    const { error } = await supabase
+                        .from('shipping_zones')
+                        .delete()
+                        .eq('id', id)
+
+                    if (error) {
+                        console.error('Error deleting zone:', error)
+                        showToast('Error deleting zone')
+                        return
+                    }
+
+                    showToast('Zone deleted successfully')
+                    loadShippingData()
+
+                } catch (err) {
+                    console.error('Failed to delete zone:', err)
+                    showToast('Failed to delete zone')
+                }
+            }
+        }
+
+        // Edit functions
+        async function editCity(id) {
+            const city = shippingCities.find(c => c.id === id)
+            if (city) {
+                showCityModal(city)
+            }
+        }
+
+        async function editZone(id) {
+            const zone = shippingZones.find(z => z.id === id)
+            if (zone) {
+                showZoneModal(zone)
+            }
+        }
+
+
+        // Update the setupShippingEventListeners function
+        function setupShippingEventListeners() {
+            // Filter buttons
+            document.querySelectorAll('.filter-btn[data-filter-shipping]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.filter-btn[data-filter-shipping]').forEach(b => b.classList.remove('active'))
+                    btn.classList.add('active')
+                    currentShippingFilter = btn.dataset.filterShipping
+                    renderCitiesView()
+                })
+            })
+
+            // Search input
+            document.getElementById('search-shipping-input').addEventListener('input', () => {
+                shippingSearchQuery = document.getElementById('search-shipping-input').value
+                renderCitiesView()
+            })
+
+            // Add city button
+            document.getElementById('add-city-btn').addEventListener('click', () => {
+                showCityModal()
+            })
+
+            // Modal events
+            document.getElementById('cancel-city-btn').addEventListener('click', () => {
+                document.getElementById('city-modal').style.display = 'none'
+            })
+
+            document.getElementById('save-city-btn').addEventListener('click', saveCity)
+
+            // Close modal on background click and close button
+            document.getElementById('city-modal').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('city-modal') || e.target.classList.contains('close-modal')) {
+                    document.getElementById('city-modal').style.display = 'none'
+                }
+            })
+        }
         // Add this initialization function
         async function initializeApp() {
             try {
@@ -2742,6 +4291,8 @@
                 // Start your application
                 loadOrders();
                 setupEventListeners();
+                setupShippingEventListeners()
+                setupZoneEditModalEvents();
 
             } catch (error) {
                 console.error('Failed to initialize app:', error);
@@ -2761,12 +4312,167 @@
         })
 
 
-        // Function to generate restaurant/cafe receipt HTML
+        // Function to show the zone edit modal
+        function showZoneEditModal(zone = null, zoneIndex = null) {
+            const modal = document.getElementById('zone-edit-modal');
+            const title = document.getElementById('zone-edit-modal-title');
+            const form = document.getElementById('zone-edit-form');
+
+            if (zone) {
+                title.textContent = 'Edit Zone';
+                document.getElementById('edit-zone-name').value = zone.zone_name || '';
+                document.getElementById('edit-zone-price').value = zone.price || '';
+            } else {
+                title.textContent = 'Add New Zone';
+                form.reset();
+            }
+
+            // Store the zone data for saving
+            modal.dataset.zoneIndex = zoneIndex !== null ? zoneIndex : '';
+            modal.dataset.zoneData = zone ? JSON.stringify(zone) : '';
+
+            modal.style.display = 'flex';
+
+            // Focus on the name field for better UX
+            setTimeout(() => {
+                document.getElementById('edit-zone-name').focus();
+            }, 100);
+        }
+
+
+        // Function to save zone from modal
+        function saveZoneFromModal() {
+            const modal = document.getElementById('zone-edit-modal');
+            const zoneIndex = modal.dataset.zoneIndex;
+            const existingZoneData = modal.dataset.zoneData ? JSON.parse(modal.dataset.zoneData) : null;
+
+            const zoneName = document.getElementById('edit-zone-name').value.trim();
+            const zonePrice = parseFloat(document.getElementById('edit-zone-price').value);
+
+            if (!zoneName) {
+                showToast('Zone name is required');
+                return;
+            }
+
+            if (isNaN(zonePrice) || zonePrice < 0) {
+                showToast('Please enter a valid price');
+                return;
+            }
+
+            const zonesContainer = document.getElementById('zones-container');
+
+            // Remove "no zones" message if it exists
+            if (zonesContainer.querySelector('.empty-zones-message')) {
+                zonesContainer.innerHTML = '';
+            }
+
+            // Create the new zone HTML
+            const newZoneHTML = `
+        <div class="zone-item" data-zone-name="${zoneName}" data-zone-price="${zonePrice}">
+            <div class="zone-info">
+                <div class="zone-name">${zoneName}</div>
+                <div class="zone-price">EGP ${zonePrice.toFixed(2)}</div>
+            </div>
+            <div class="zone-actions">
+                <button type="button" class="action-btn edit-btn edit-zone-modal-btn">
+                    Edit
+                </button>
+                <button type="button" class="action-btn delete-btn delete-zone-btn">
+                    Delete
+                </button>
+            </div>
+        </div>
+    `;
+
+            if (zoneIndex !== null && zoneIndex !== '' && zoneIndex !== 'null') {
+                // Replace existing zone
+                const existingZone = zonesContainer.querySelector(`[data-zone-index="${zoneIndex}"]`);
+                if (existingZone) {
+                    existingZone.outerHTML = newZoneHTML;
+                    // Update the data attribute for the new element
+                    const newZone = zonesContainer.querySelector(`[data-zone-name="${zoneName}"]`);
+                    if (newZone) {
+                        newZone.setAttribute('data-zone-index', zoneIndex);
+                    }
+                }
+            } else {
+                // Add new zone - generate a unique index
+                const newIndex = 'zone_' + Date.now();
+                const zoneWithIndex = newZoneHTML.replace(
+                    'class="zone-item"',
+                    `class="zone-item" data-zone-index="${newIndex}"`
+                );
+                zonesContainer.innerHTML += zoneWithIndex;
+            }
+
+            // Re-attach event listeners
+            attachZoneEventListeners();
+
+            // Close modal
+            modal.style.display = 'none';
+
+            showToast(`Zone ${existingZoneData ? 'updated' : 'added'} successfully`);
+        }
+        // Function to attach event listeners to zone buttons
+        function attachZoneEventListeners() {
+            const zonesContainer = document.getElementById('zones-container');
+
+            // Edit zone buttons
+            zonesContainer.querySelectorAll('.edit-zone-modal-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const zoneItem = e.target.closest('.zone-item');
+                    const zoneName = zoneItem.querySelector('.zone-name').textContent;
+                    const zonePrice = parseFloat(zoneItem.querySelector('.zone-price').textContent.replace('EGP ', ''));
+                    const zoneIndex = zoneItem.dataset.zoneIndex;
+
+                    showZoneEditModal({
+                        zone_name: zoneName,
+                        price: zonePrice
+                    }, zoneIndex);
+                });
+            });
+
+            // Delete zone buttons
+            zonesContainer.querySelectorAll('.delete-zone-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const zoneItem = e.target.closest('.zone-item');
+                    const zoneName = zoneItem.querySelector('.zone-name').textContent;
+                    deleteZoneFromModal(zoneItem.dataset.zoneIndex, zoneName);
+                });
+            });
+        }
+
+
+        // Function to delete zone with confirmation
+        function deleteZoneFromModal(zoneIndex, zoneName) {
+            if (confirm(`Are you sure you want to delete zone "${zoneName}"?`)) {
+                const zoneElement = document.querySelector(`[data-zone-index="${zoneIndex}"]`);
+                if (zoneElement) {
+                    zoneElement.remove();
+                }
+
+                // Show "no zones" message if all zones are deleted
+                const zonesContainer = document.getElementById('zones-container');
+                if (zonesContainer.children.length === 0) {
+                    zonesContainer.innerHTML = `
+                <div class="empty-zones-message">
+                    No zones added yet
+                </div>
+            `;
+                }
+
+                showToast('Zone deleted successfully');
+            }
+        }
+
+        // Function to generate restaurant/cafe receipt HTML with voucher information
         function generateInvoiceHTML(order, type = 'invoice') {
             const items = order.items ? JSON.parse(order.items) : [];
-            const subtotal = order.total;
-            const tax = 0; // Adjust if you have tax
-            const total = subtotal + tax;
+            const subtotal = order.subtotal || items.reduce((sum, item) => sum + ((item.amount_cents || item.price * 100) / 100 * item.quantity), 0);
+            const discount = order.discount || 0;
+            const shippingCost = order.shipping_cost || 0;
+            const freeShipping = order.free_shipping || false;
+            const total = order.total || subtotal - discount + shippingCost;
 
             const currentDate = new Date().toLocaleDateString('en-EG', {
                 year: 'numeric',
@@ -2785,6 +4491,32 @@
                 day: 'numeric'
             });
 
+            // Voucher information section
+            let voucherHTML = '';
+            if (order.voucher_code || order.voucher_id) {
+                voucherHTML = `
+            <div class="invoice-section">
+                <div class="invoice-section-title">Voucher Applied</div>
+                <div class="invoice-row">
+                    <span class="invoice-label">Voucher Code:</span>
+                    <span class="invoice-value" style="color: var(--success); font-weight: bold;">${order.voucher_code || 'N/A'}</span>
+                </div>
+                ${discount > 0 ? `
+                <div class="invoice-row">
+                    <span class="invoice-label">Discount Applied:</span>
+                    <span class="invoice-value" style="color: var(--success);">-EGP ${discount.toFixed(2)}</span>
+                </div>
+                ` : ''}
+                ${freeShipping ? `
+                <div class="invoice-row">
+                    <span class="invoice-label">Free Shipping:</span>
+                    <span class="invoice-value" style="color: var(--success);">✅ Applied</span>
+                </div>
+                ` : ''}
+            </div>
+        `;
+            }
+
             return `
         <div class="invoice-header">
             <h1 class="invoice-title">Syrine's Crumble</h1>
@@ -2796,7 +4528,7 @@
                 <div class="invoice-section-title">Order Details</div>
                 <div class="invoice-row">
                     <span class="invoice-label">Order #:</span>
-                    <span class="invoice-value">${order.id}</span>
+                    <span class="invoice-value">${order.order_id}</span>
                 </div>
                 <div class="invoice-row">
                     <span class="invoice-label">Date:</span>
@@ -2816,6 +4548,8 @@
                 </div>
             </div>
         </div>
+        
+        ${voucherHTML}
         
         <table class="invoice-table">
             <thead>
@@ -2844,14 +4578,18 @@
             <tfoot>
                 <tr>
                     <td colspan="2" style="text-align: right; font-weight: bold;">Subtotal:</td>
-                    <td style="font-weight: bold;">${subtotal.toFixed(2)}</td>
+                    <td style="font-weight: bold;">EGP ${subtotal.toFixed(2)}</td>
                 </tr>
-                ${tax > 0 ? `
+                ${discount > 0 ? `
                 <tr>
-                    <td colspan="2" style="text-align: right; font-weight: bold;">Tax:</td>
-                    <td style="font-weight: bold;">${tax.toFixed(2)}</td>
+                    <td colspan="2" style="text-align: right; font-weight: bold; color: var(--success);">Discount:</td>
+                    <td style="font-weight: bold; color: var(--success);">-EGP ${discount.toFixed(2)}</td>
                 </tr>
                 ` : ''}
+                <tr>
+                    <td colspan="2" style="text-align: right; font-weight: bold;">Shipping:</td>
+                    <td style="font-weight: bold;">${freeShipping || shippingCost === 0 ? 'FREE' : `EGP ${shippingCost.toFixed(2)}`}</td>
+                </tr>
                 <tr class="invoice-total">
                     <td colspan="2" style="text-align: right;">TOTAL:</td>
                     <td>EGP ${total.toFixed(2)}</td>
@@ -2879,7 +4617,7 @@
         
         <div class="invoice-footer">
             <div class="thank-you">Thank you for your order!</div>
-            <div>Contact: +20 123 456 7890</div>
+            <div>Contact: +20 104 493 0284</div>
             <div>Follow us on social media</div>
             <div style="margin-top: 0.5rem;">* Please keep this receipt for your records *</div>
         </div>
@@ -2928,6 +4666,26 @@
             });
         }
 
+        // Function to reset notification count on hover
+        function setupNotificationResetOnHover() {
+            const orderRows = document.querySelectorAll('#orders-table tr[data-order-id]');
+
+            orderRows.forEach(row => {
+                row.addEventListener('mouseenter', () => {
+                    if (row.classList.contains('new-order')) {
+                        // Reset notification count
+                        unreadCount = 0;
+                        notificationCount.textContent = '0';
+                        notificationCount.style.display = 'none';
+                        notificationIndicatorText.textContent = 'No new orders';
+
+                        // Remove new-order class from this row
+                        row.classList.remove('new-order', 'new-order-pulse');
+                    }
+                });
+            });
+        }
+
         // Function to download receipt as PDF
         function downloadInvoice(order, type = 'invoice') {
             // Create a printable version of the receipt
@@ -2939,7 +4697,7 @@
         <!DOCTYPE html>
         <html>
         <head>
-            <title>${type === 'invoice' ? 'Invoice' : 'Receipt'} #${order.id}</title>
+            <title>${type === 'invoice' ? 'Invoice' : 'Receipt'} #${order.order_id}</title>
             <style>
                 @media print {
                     @page {
@@ -2993,7 +4751,6 @@
 
             printWindow.document.close();
         }
-
         // Toggle notification panel
         notificationHeader.addEventListener('click', () => {
             panelOpen = !panelOpen
@@ -3056,10 +4813,16 @@
                     ordersTabContent.style.display = 'block'
                     cookiesTabContent.style.display = 'none'
                     vouchersTabContent.style.display = 'none'
+                    shippingTabContent.style.display = 'none';
+
+                    loadOrders();
+
                 } else if (tabName === 'cookies') {
                     ordersTabContent.style.display = 'none'
                     cookiesTabContent.style.display = 'block'
                     vouchersTabContent.style.display = 'none'
+                    shippingTabContent.style.display = 'none';
+
                     if (cookies.length === 0) {
                         loadCookies()
                     } else {
@@ -3069,11 +4832,20 @@
                     ordersTabContent.style.display = 'none'
                     cookiesTabContent.style.display = 'none'
                     vouchersTabContent.style.display = 'block'
+                    shippingTabContent.style.display = 'none';
                     if (vouchers.length === 0) {
                         loadVouchers()
                     } else {
                         renderVouchers()
                     }
+                } else if (tabName === 'shipping') {
+                    ordersTabContent.style.display = 'none';
+                    cookiesTabContent.style.display = 'none';
+                    vouchersTabContent.style.display = 'none';
+                    shippingTabContent.style.display = 'block';
+
+
+                    loadShippingData();
                 }
             })
         })
@@ -3103,38 +4875,80 @@
         })
 
 
-        // Load vouchers from Supabase
-        async function loadVouchers() {
+        async function loadVouchers(loadMore = false) {
+            const state = infiniteScrollState.vouchers;
+
+            if (state.isLoading) return;
+
             try {
-                const vouchersTable = document.getElementById('vouchers-table')
-                vouchersTable.innerHTML = `
-            <tr>
-                <td colspan="10">
-                    <div class="loading">
-                        <div class="loading-spinner"></div>
-                    </div>
-                </td>
-            </tr>
-        `
+                state.isLoading = true;
 
-                const { data, error } = await supabase
-                    .from('vouchers')
-                    .select('*')
-                    .order('created_at', { ascending: false })
+                const vouchersTable = document.getElementById('vouchers-table');
 
-                if (error) {
-                    console.error('Error loading vouchers:', error)
-                    showToast('Error loading vouchers')
-                    return
+                if (!loadMore) {
+                    vouchersTable.innerHTML = `
+                <tr>
+                    <td colspan="11">
+                        <div class="loading">
+                            <div class="loading-spinner"></div>
+                        </div>
+                    </td>
+                </tr>
+            `;
+                    state.currentPage = 1;
+                    state.allData = [];
+                } else {
+                    document.getElementById('vouchers-loading').style.display = 'flex';
                 }
 
-                vouchers = data
-                updateVouchersStats()
-                renderVouchers()
+                const from = (state.currentPage - 1) * state.pageSize;
+                const to = from + state.pageSize - 1;
+
+                const { data, error, count } = await supabase
+                    .from('vouchers')
+                    .select('*', { count: 'exact' })
+                    .order('created_at', { ascending: false })
+                    .range(from, to);
+
+                if (error) {
+                    console.error('Error loading vouchers:', error);
+                    showToast('Error loading vouchers');
+                    return;
+                }
+
+                const totalLoaded = state.currentPage * state.pageSize;
+                state.hasMore = totalLoaded < count;
+
+                if (loadMore) {
+                    state.allData = [...state.allData, ...data];
+                } else {
+                    state.allData = data;
+                }
+
+                state.currentPage++;
+
+                vouchers = state.allData;
+                updateVouchersStats();
+                renderVouchers();
+
+                document.getElementById('vouchers-loading').style.display = 'none';
+
+                if (!state.hasMore && state.allData.length > 0) {
+                    const existingEndMessage = document.getElementById('vouchers-end-message');
+                    if (!existingEndMessage) {
+                        const endMessage = document.createElement('div');
+                        endMessage.id = 'vouchers-end-message';
+                        endMessage.className = 'end-of-results';
+                        endMessage.textContent = 'No more vouchers to load';
+                        document.getElementById('vouchers-tab-content').appendChild(endMessage);
+                    }
+                }
 
             } catch (err) {
-                console.error('Failed to load vouchers:', err)
-                showToast('Failed to load vouchers')
+                console.error('Failed to load vouchers:', err);
+                showToast('Failed to load vouchers');
+            } finally {
+                state.isLoading = false;
             }
         }
 
@@ -3737,8 +5551,8 @@
         // Add a new notification
         function addNotification(order) {
             const notification = {
-                id: order.id,
-                title: `Order #${order.id}`,
+                id: order.order_id,
+                title: `Order #${order.order_id}`,
                 customer: order.customer_name,
                 total: order.total,
                 items: order.items ? JSON.parse(order.items).length : 0,
@@ -4184,7 +5998,7 @@
             <div class="order-info-grid">
                 <div class="info-item">
                     <div class="info-label"><span>🆔</span> Order ID</div>
-                    <div class="info-value">#${order.id}</div>
+                    <div class="info-value">#${order.order_id}</div>
                 </div>
                 <div class="info-item">
                     <div class="info-label"><span>👤</span> Customer Name</div>
@@ -4452,6 +6266,7 @@
 
         // Filter orders based on current filter and search
         function filterOrders() {
+            console.log("orders", orders)
             return orders.filter(order => {
                 // Apply status filter
                 if (currentFilter !== 'all' && order.status !== currentFilter) {
@@ -4461,12 +6276,21 @@
                 // Apply search filter
                 if (searchQuery) {
                     const searchTerm = searchQuery.toLowerCase()
-                    return (
-                        order.id.toString().includes(searchTerm) ||
-                        order.customer_name.toLowerCase().includes(searchTerm) ||
-                        order.phone.includes(searchTerm) ||
-                        order.total.toString().includes(searchTerm)
-                    )
+
+                    // Get display order ID
+                    const displayOrderId = (order.order_id || order.id).toString().toLowerCase();
+
+                    // Search in multiple fields
+                    const searchableFields = [
+                        displayOrderId,
+                        order.customer_name.toLowerCase(),
+                        order.phone,
+                        order.total.toString(),
+                        order.payment_method.toLowerCase(),
+                        order.status.toLowerCase()
+                    ];
+
+                    return searchableFields.some(field => field.includes(searchTerm));
                 }
 
                 return true
@@ -4510,6 +6334,7 @@
         function renderOrders() {
             const filteredOrders = filterOrders()
             renderFilteredOrders(filteredOrders)
+            setupNotificationResetOnHover();
         }
 
         // Render all cookies based on current filters
@@ -4518,7 +6343,6 @@
             renderFilteredCookies(filteredCookies)
         }
 
-        // Render a custom set of orders
         function renderFilteredOrders(filteredOrders, message) {
             if (filteredOrders.length === 0) {
                 tableBody.innerHTML = `
@@ -4533,13 +6357,15 @@
 
             tableBody.innerHTML = ''
 
-            console.log("filteredOrders", filteredOrders)
             filteredOrders.forEach(order => {
                 const row = document.createElement('tr')
-                // Don't add new-order class for existing orders
-                row.setAttribute('data-order-id', order.id)
+
+                // Use order_id if available, otherwise fall back to id
+                const displayOrderId = order.order_id || order.id;
+
+                row.setAttribute('data-order-id', displayOrderId)
                 row.innerHTML = `
-            <td>${order.id}</td>
+            <td>${displayOrderId}</td>
             <td>${order.customer_name}</td>
             <td>${order.phone}</td>
             <td>EGP ${order.total}</td>
@@ -4564,7 +6390,6 @@
                 tableBody.appendChild(row)
             })
         }
-
         // Update the editItem function to handle variants
         async function editItem(id, type, variant = null) {
             try {
@@ -5240,10 +7065,10 @@
         function renderNewOrder(order) {
             const filteredOrders = filterOrders()
             const row = document.createElement('tr')
-            row.classList.add('highlight', 'new-order', 'new-order-pulse') // Add these classes
-            row.setAttribute('data-order-id', order.id) // Add ID for tracking
+            row.classList.add('highlight', 'new-order', 'new-order-pulse')
+            row.setAttribute('data-order-id', order.order_id)
             row.innerHTML = `
-        <td>${order.id}</td>
+        <td>${order.order_id}</td>
         <td>${order.customer_name}</td>
         <td>${order.phone}</td>
         <td>EGP ${order.total}</td>
@@ -5252,14 +7077,19 @@
         <td><span class="status-badge ${getStatusClass(order.status)}">${order.status}</span></td>
         <td>${formatDateTime(order.created_at)}</td>
     `
-
-            // Add hover event to remove new-order class
+            // Add hover event to reset notification count
             row.addEventListener('mouseenter', () => {
-                unreadCount--;
-                console.log("unreadCountunreadCount", unreadCount)
-                row.classList.remove('new-order', 'new-order-pulse')
-            })
+                if (row.classList.contains('new-order')) {
+                    // Reset notification count
+                    unreadCount = 0;
+                    notificationCount.textContent = '0';
+                    notificationCount.style.display = 'none';
+                    notificationIndicatorText.textContent = 'No new orders';
 
+                    // Remove new-order class from this row
+                    row.classList.remove('new-order', 'new-order-pulse');
+                }
+            });
             // Make row clickable to view details
             row.addEventListener('click', () => {
                 showOrderDetails(order)
@@ -5282,11 +7112,16 @@
             // Add notification for the new order
             addNotification(order)
 
+
             // Trigger notifications for new orders only
-            const message = `Order #${order.id} from ${order.customer_name}, Total: EGP ${order.total}`
+            const message = `Order #${order.order_id} from ${order.customer_name}, Total: EGP ${order.total}`
             showToast(message)
             playSound()
             showBrowserNotification(message)
+
+            setTimeout(() => {
+                setupNotificationResetOnHover();
+            }, 100);
         }
 
         // Sort orders
@@ -5338,7 +7173,7 @@
             let csv = 'Order ID,Customer Name,Phone,Total,Payment Method,Status,Time\n'
 
             filteredOrders.forEach(order => {
-                csv += `"${order.id}","${order.customer_name}","${order.phone}","${order.total}","${order.payment_method}","${order.status}","${formatDateTime(order.created_at)}"\n`
+                csv += `"${order.order_id}","${order.customer_name}","${order.phone}","${order.total}","${order.payment_method}","${order.status}","${formatDateTime(order.created_at)}"\n`
             })
 
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
@@ -5381,99 +7216,155 @@
             showToast('Items exported successfully')
         }
 
-        // Load existing orders initially
-        async function loadOrders() {
+        async function loadOrders(loadMore = false) {
+            const state = infiniteScrollState.orders;
+
+            if (state.isLoading) return;
+
             try {
-                tableBody.innerHTML = `
-                    <tr>
-                        <td colspan="8">
-                            <div class="loading">
-                                <div class="loading-spinner"></div>
-                            </div>
-                        </td>
-                    </tr>
-                `
+                state.isLoading = true;
 
-                const { data, error } = await supabase
-                    .from('orders')
-                    .select('*')
-                    .order('created_at', { ascending: false })
-                    .limit(50)
-
-                if (error) {
-                    console.error('Error loading orders:', error)
-                    showToast('Error loading orders')
-                    return
+                if (!loadMore) {
+                    // First load - show loading in table
+                    tableBody.innerHTML = `
+                <tr>
+                    <td colspan="8">
+                        <div class="loading">
+                            <div class="loading-spinner"></div>
+                        </div>
+                    </td>
+                </tr>
+            `;
+                    state.currentPage = 1;
+                    state.allData = [];
+                } else {
+                    // Show loading more indicator
+                    document.getElementById('orders-loading').style.display = 'flex';
                 }
 
-                // Store orders and update stats
-                orders = data
-                updateStats()
-                renderOrders()
+                const from = (state.currentPage - 1) * state.pageSize;
+                const to = from + state.pageSize - 1;
 
-                // Add existing orders to notifications
-                data.slice(0, 5).forEach(order => {
-                    const notification = {
-                        id: order.id,
-                        title: `Order #${order.id}`,
-                        customer: order.customer_name,
-                        total: order.total,
-                        items: order.items ? JSON.parse(order.items).length : 0,
-                        time: new Date(order.created_at).toLocaleTimeString(),
-                        isNew: false
+                const { data, error, count } = await supabase
+                    .from('orders')
+                    .select('*', { count: 'exact' })
+                    .order('created_at', { ascending: false })
+                    .range(from, to);
+
+                if (error) {
+                    console.error('Error loading orders:', error);
+                    showToast('Error loading orders');
+                    return;
+                }
+
+                // Check if there's more data
+                const totalLoaded = state.currentPage * state.pageSize;
+                state.hasMore = totalLoaded < count;
+
+                // Add new data to existing data
+                if (loadMore) {
+                    state.allData = [...state.allData, ...data];
+                } else {
+                    state.allData = data;
+                }
+
+                state.currentPage++;
+
+                // Update UI with all loaded data
+                orders = state.allData;
+                updateStats();
+                renderOrders();
+
+                // Hide loading indicators
+                document.getElementById('orders-loading').style.display = 'none';
+
+                // Show end of results message if no more data
+                if (!state.hasMore && state.allData.length > 0) {
+                    const existingEndMessage = document.getElementById('orders-end-message');
+                    if (!existingEndMessage) {
+                        const endMessage = document.createElement('div');
+                        endMessage.id = 'orders-end-message';
+                        endMessage.className = 'end-of-results';
+                        endMessage.textContent = 'No more orders to load';
+                        document.getElementById('orders-tab-content').appendChild(endMessage);
                     }
-                    notifications.push(notification)
-                })
+                }
 
-                renderNotifications()
+                // Add to notifications (only first load)
+                if (!loadMore) {
+                    data.slice(0, 5).forEach(order => {
+                        const notification = {
+                            id: order.order_id,
+                            title: `Order #${order.order_id}`,
+                            customer: order.customer_name,
+                            total: order.total,
+                            items: order.items ? JSON.parse(order.items).length : 0,
+                            time: new Date(order.created_at).toLocaleTimeString(),
+                            isNew: false
+                        };
+                        notifications.push(notification);
+                    });
+                    renderNotifications();
+                }
 
             } catch (err) {
-                console.error('Failed to load orders:', err)
-                showToast('Failed to load orders')
+                console.error('Failed to load orders:', err);
+                showToast('Failed to load orders');
+            } finally {
+                state.isLoading = false;
             }
         }
 
-        // Update the loadCookies function to split each cookie into chewy and crumble variants
-        async function loadCookies() {
-            try {
-                cookiesTable.innerHTML = `
-            <tr>
-                <td colspan="10">
-                    <div class="loading">
-                        <div class="loading-spinner"></div>
-                    </div>
-                </td>
-            </tr>
-        `
+        async function loadCookies(loadMore = false) {
+            const state = infiniteScrollState.cookies;
 
-                // Fetch cookies from the 'cookies' table
+            if (state.isLoading) return;
+
+            try {
+                state.isLoading = true;
+
+                if (!loadMore) {
+                    cookiesTable.innerHTML = `
+                <tr>
+                    <td colspan="10">
+                        <div class="loading">
+                            <div class="loading-spinner"></div>
+                        </div>
+                    </td>
+                </tr>
+            `;
+                    state.currentPage = 1;
+                    state.allData = [];
+                } else {
+                    document.getElementById('cookies-loading').style.display = 'flex';
+                }
+
+                // Load all data first (for combined tables, we'll optimize later)
                 const { data: cookiesData, error: cookiesError } = await supabase
                     .from('cookies')
                     .select('*')
-                    .order('name', { ascending: true })
+                    .order('name', { ascending: true });
 
                 if (cookiesError) {
-                    console.error('Error loading cookies:', cookiesError)
-                    showToast('Error loading cookies')
+                    console.error('Error loading cookies:', cookiesError);
+                    showToast('Error loading cookies');
                 }
 
-                // Fetch boxes from the 'boxes' table
                 const { data: boxesData, error: boxesError } = await supabase
                     .from('boxes')
                     .select('*')
-                    .order('name', { ascending: true })
+                    .order('name', { ascending: true });
 
                 if (boxesError) {
-                    console.error('Error loading boxes:', boxesError)
+                    console.error('Error loading boxes:', boxesError);
                 }
 
-                // Combine cookies and boxes into a single array
-                const combinedItems = []
+                // Combine and process data
+                let combinedItems = [];
 
-                // Process cookies - create separate entries for chewy and crumble
+                // Process cookies
                 if (cookiesData) {
                     cookiesData.forEach(cookie => {
-                        // Add chewy variant
                         if (cookie.chewy_price && cookie.is_active) {
                             combinedItems.push({
                                 id: `${cookie.id}_chewy`,
@@ -5487,10 +7378,9 @@
                                 image_url: cookie.image_url_chewy || '',
                                 is_active: cookie.is_active,
                                 created_at: cookie.created_at
-                            })
+                            });
                         }
 
-                        // Add crumble variant
                         if (cookie.crumble_price && cookie.is_active) {
                             combinedItems.push({
                                 id: `${cookie.id}_crumble`,
@@ -5504,12 +7394,12 @@
                                 image_url: cookie.image_url_crumble || '',
                                 is_active: cookie.is_active,
                                 created_at: cookie.created_at
-                            })
+                            });
                         }
-                    })
+                    });
                 }
 
-                // Process boxes (unchanged)
+                // Process boxes
                 if (boxesData) {
                     boxesData.forEach(box => {
                         combinedItems.push({
@@ -5520,21 +7410,53 @@
                             price: box.price || box.cost || 0,
                             stock: box.stock || box.quantity || 0,
                             image_url: box.image_url || '',
-                            variant: null // Boxes don't have variants
-                        })
-                    })
+                            variant: null
+                        });
+                    });
                 }
 
-                cookies = combinedItems
-                updateCookiesStats()
-                renderCookies()
+                // Apply pagination to combined data
+                const startIndex = (state.currentPage - 1) * state.pageSize;
+                const endIndex = startIndex + state.pageSize;
+                const pageData = combinedItems.slice(startIndex, endIndex);
+
+                // Check if there's more data
+                state.hasMore = endIndex < combinedItems.length;
+
+                // Add new data to existing data
+                if (loadMore) {
+                    state.allData = [...state.allData, ...pageData];
+                } else {
+                    state.allData = pageData;
+                }
+
+                state.currentPage++;
+
+                // Update UI
+                cookies = state.allData;
+                updateCookiesStats();
+                renderCookies();
+
+                document.getElementById('cookies-loading').style.display = 'none';
+
+                if (!state.hasMore && state.allData.length > 0) {
+                    const existingEndMessage = document.getElementById('cookies-end-message');
+                    if (!existingEndMessage) {
+                        const endMessage = document.createElement('div');
+                        endMessage.id = 'cookies-end-message';
+                        endMessage.className = 'end-of-results';
+                        endMessage.textContent = 'No more items to load';
+                        document.getElementById('cookies-tab-content').appendChild(endMessage);
+                    }
+                }
 
             } catch (err) {
-                console.error('Failed to load items:', err)
-                showToast('Failed to load items')
+                console.error('Failed to load items:', err);
+                showToast('Failed to load items');
+            } finally {
+                state.isLoading = false;
             }
         }
-
 
         // Set up event listeners
         function setupEventListeners() {
@@ -5547,6 +7469,53 @@
                     renderOrders()
                 })
             })
+
+            // Add this to your existing setupEventListeners function
+            document.addEventListener('click', function (e) {
+                // Handle shipping edit buttons
+                if (e.target.classList.contains('edit-btn') && e.target.dataset.type === 'city') {
+                    const cityId = parseInt(e.target.dataset.id);
+                    editCity(cityId);
+                }
+
+                if (e.target.classList.contains('edit-btn') && e.target.dataset.type === 'zone') {
+                    const zoneId = parseInt(e.target.dataset.id);
+                    editZone(zoneId);
+                }
+
+                // Handle shipping delete buttons
+                if (e.target.classList.contains('delete-btn') && e.target.dataset.type === 'city') {
+                    const cityId = parseInt(e.target.dataset.id);
+                    const city = shippingCities.find(c => c.id === cityId);
+                    if (city) {
+                        deleteCity(cityId, city.city);
+                    }
+                }
+
+                if (e.target.classList.contains('delete-btn') && e.target.dataset.type === 'zone') {
+                    const zoneId = parseInt(e.target.dataset.id);
+                    const zone = shippingZones.find(z => z.id === zoneId);
+                    if (zone) {
+                        deleteZone(zoneId, zone.zone_name);
+                    }
+                }
+
+                // Handle view zones buttons
+                if (e.target.classList.contains('view-zones-btn')) {
+                    const cityId = parseInt(e.target.dataset.id);
+                    const cityName = e.target.dataset.city;
+
+                    // Switch to zones view and filter by this city
+                    currentShippingView = 'zones';
+                    document.querySelectorAll('.filter-btn[data-filter-shipping]').forEach(btn => btn.classList.remove('active'));
+                    document.querySelector('.filter-btn[data-filter-shipping="zones"]').classList.add('active');
+                    document.getElementById('cities-view').style.display = 'none';
+                    document.getElementById('zones-view').style.display = 'block';
+                    document.getElementById('search-shipping-input').value = cityName;
+                    shippingSearchQuery = cityName;
+                    renderZonesView();
+                }
+            });
 
             // Refresh items dropdown when free item checkbox is checked
             document.getElementById('voucher-free-item').addEventListener('change', function () {
@@ -5890,6 +7859,23 @@
                 updateVouchersStats()
                 renderVouchers()
                 showToast(`Voucher deleted: ${payload.old.code}`)
+            })
+            .subscribe()
+
+        // Add real-time subscriptions
+        supabase
+            .channel('shipping-cities')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'shipping_prices' }, payload => {
+                console.log('Shipping cities changed:', payload)
+                loadShippingData()
+            })
+            .subscribe()
+
+        supabase
+            .channel('shipping-zones')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'shipping_zones' }, payload => {
+                console.log('Shipping zones changed:', payload)
+                loadShippingData()
             })
             .subscribe()
     </script>
