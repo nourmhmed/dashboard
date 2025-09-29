@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Orders Dashboard</title>
+    <title>Admin Panel | Syrine's Crumble</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -1794,6 +1794,434 @@
         body.dark-mode #upload-waiting-modal .modal-body {
             background: #1e293b;
         }
+
+        /* Invoice/Receipt styles for restaurant/cafe format */
+        .invoice-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .invoice-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            flex: 1;
+            min-width: 120px;
+            justify-content: center;
+        }
+
+        .invoice-preview {
+            background: var(--primary);
+            color: white;
+        }
+
+        .invoice-preview:hover {
+            background: var(--primary-dark);
+        }
+
+        .invoice-download {
+            background: var(--success);
+            color: white;
+        }
+
+        .invoice-download:hover {
+            background: #0d9c4d;
+        }
+
+        /* Restaurant/Cafe Receipt Modal Styles */
+        .invoice-modal .modal-content {
+            max-width: 320px;
+            /* Much narrower for receipt format */
+            width: 95%;
+            font-family: 'Courier New', monospace;
+            /* Monospace for receipt look */
+        }
+
+        .invoice-header {
+            text-align: center;
+            padding: 1rem;
+            border-bottom: 1px dashed #ccc;
+            margin-bottom: 1rem;
+        }
+
+        .invoice-title {
+            font-size: 1.2rem;
+            color: #000;
+            margin-bottom: 0.3rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .invoice-subtitle {
+            color: #666;
+            font-size: 0.8rem;
+        }
+
+        .invoice-body {
+            padding: 0 1rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .invoice-info {
+            margin-bottom: 1rem;
+        }
+
+        .invoice-section {
+            margin-bottom: 1rem;
+        }
+
+        .invoice-section-title {
+            font-weight: bold;
+            margin-bottom: 0.3rem;
+            border-bottom: 1px dotted #ccc;
+            padding-bottom: 0.3rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+
+        .invoice-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.2rem;
+            padding: 0.1rem 0;
+            font-size: 0.8rem;
+        }
+
+        .invoice-label {
+            font-weight: normal;
+            color: #000;
+        }
+
+        .invoice-value {
+            font-weight: bold;
+        }
+
+        .invoice-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.8rem;
+        }
+
+        .invoice-table th {
+            background: #f5f5f5;
+            color: #000;
+            padding: 0.4rem;
+            text-align: left;
+            font-weight: bold;
+            border-bottom: 1px dashed #ccc;
+            font-size: 0.8rem;
+        }
+
+        .invoice-table td {
+            padding: 0.4rem;
+            border-bottom: 1px dotted #eee;
+            vertical-align: top;
+        }
+
+        .invoice-table .item-name {
+            font-weight: bold;
+        }
+
+        .invoice-table .flavor-item {
+            padding-left: 1rem;
+            font-style: italic;
+            color: #666;
+            font-size: 0.75rem;
+        }
+
+        .invoice-total {
+            background: #f5f5f5;
+            font-weight: bold;
+            font-size: 0.9rem;
+            border-top: 2px solid #000;
+            border-bottom: 2px solid #000;
+        }
+
+        .invoice-footer {
+            text-align: center;
+            margin-top: 1rem;
+            padding-top: 0.5rem;
+            border-top: 1px dashed #ccc;
+            color: #666;
+            font-size: 0.7rem;
+            line-height: 1.2;
+        }
+
+        .thank-you {
+            font-weight: bold;
+            margin: 0.5rem 0;
+            font-size: 0.9rem;
+        }
+
+        /* Print styles for receipt format */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+
+            .invoice-modal,
+            .invoice-modal * {
+                visibility: visible;
+            }
+
+            .invoice-modal {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                max-width: 320px;
+                box-shadow: none;
+                margin: 0;
+                padding: 0;
+            }
+
+            .modal-actions,
+            .close-modal {
+                display: none !important;
+            }
+
+            .invoice-body {
+                padding: 0 0.5rem 0.5rem;
+            }
+        }
+
+        /* Dark mode support for receipt */
+        body.dark-mode .invoice-modal .modal-content {
+            background: white !important;
+            color: black !important;
+        }
+
+        body.dark-mode .invoice-table th {
+            background: #f5f5f5 !important;
+            color: #000 !important;
+        }
+
+        body.dark-mode .invoice-total {
+            background: #f5f5f5 !important;
+        }
+
+        /* Make invoice modal scrollable */
+        .invoice-modal .modal-content {
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .invoice-body {
+            flex: 1;
+            overflow-y: auto;
+            max-height: calc(90vh - 120px);
+            /* Account for header and actions */
+            padding: 0 1rem 1rem;
+        }
+
+        /* Custom scrollbar for invoice modal */
+        .invoice-body::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .invoice-body::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .invoice-body::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+
+        .invoice-body::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        /* Vouchers specific styles */
+        .voucher-code {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            background: var(--secondary);
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            color: var(--primary);
+        }
+
+        /* Form checkbox groups */
+        .form-group label input[type="checkbox"] {
+            margin-right: 0.5rem;
+        }
+
+        /* Responsive adjustments for vouchers table */
+        @media (max-width: 768px) {
+
+            #vouchers-tab-content th:nth-child(4),
+            #vouchers-tab-content th:nth-child(5),
+            #vouchers-tab-content th:nth-child(6),
+            #vouchers-tab-content td:nth-child(4),
+            #vouchers-tab-content td:nth-child(5),
+            #vouchers-tab-content td:nth-child(6) {
+                display: none;
+            }
+        }
+
+        /* Discount field readonly states */
+        .discount-field-readonly {
+            background-color: #f5f5f5 !important;
+            border-color: #ddd !important;
+            color: #999 !important;
+            cursor: not-allowed !important;
+        }
+
+        .discount-field-editable {
+            background-color: white !important;
+            border-color: var(--gray-light) !important;
+            color: var(--dark) !important;
+            cursor: text !important;
+        }
+
+        /* Dark mode support for readonly fields */
+        body.dark-mode .discount-field-readonly {
+            background-color: #374151 !important;
+            border-color: #4B5563 !important;
+            color: #9CA3AF !important;
+        }
+
+        body.dark-mode .discount-field-editable {
+            background-color: #1F2937 !important;
+            border-color: #4B5563 !important;
+            color: #E5E7EB !important;
+        }
+
+        /* Form input focus states */
+        #voucher-discount-rate:not([readonly]):focus,
+        #voucher-discount-amount:not([readonly]):focus {
+            border-color: var(--primary) !important;
+            box-shadow: 0 0 0 3px rgba(192, 57, 79, 0.1) !important;
+        }
+
+        /* Multi-select dropdown styles */
+        #voucher-items {
+            font-family: inherit;
+            font-size: 0.9rem;
+            background: white;
+            transition: var(--transition);
+        }
+
+        #voucher-items:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(192, 57, 79, 0.1);
+        }
+
+        #voucher-items option {
+            padding: 0.5rem;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        #voucher-items option:hover {
+            background-color: var(--secondary);
+        }
+
+        #voucher-items option:checked {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        /* Dark mode support */
+        body.dark-mode #voucher-items {
+            background: #1e293b;
+            color: #e2e8f0;
+            border-color: #334155;
+        }
+
+        body.dark-mode #voucher-items option {
+            background: #1e293b;
+            color: #e2e8f0;
+        }
+
+        body.dark-mode #voucher-items option:hover {
+            background-color: var(--primary-light);
+        }
+
+        body.dark-mode #voucher-items option:checked {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        /* Loading state for dropdown */
+        .loading-dropdown {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .loading-dropdown::after {
+            content: " (Loading...)";
+            font-style: italic;
+            color: var(--gray);
+        }
+
+        /* Voucher status badges */
+        .status-available {
+            background: #d9f5e8;
+            color: #0c9d58;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .status-available:hover {
+            background: #c0ebd9;
+            transform: scale(1.05);
+        }
+
+        .status-out-of-stock {
+            background: #fee2e2;
+            color: #dc2626;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .status-out-of-stock:hover {
+            background: #fecaca;
+            transform: scale(1.05);
+        }
+
+        /* Status cell styling */
+        .status-cell {
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .status-cell:hover .status-badge {
+            transform: scale(1.05);
+        }
+
+        /* Dark mode support */
+        body.dark-mode .status-available {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        body.dark-mode .status-out-of-stock {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        .voucher-code {
+            background: var(--secondary);
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            color: var(--primary);
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+        }
     </style>
 </head>
 
@@ -1810,13 +2238,16 @@
             <button class="sidebar-tab" data-tab="cookies">
                 <span>🍪</span> Cookies & Boxes
             </button>
+            <button class="sidebar-tab" data-tab="vouchers">
+                <span>🎫</span> Vouchers
+            </button>
         </div>
     </div>
 
     <!-- Main content area -->
     <div class="main-content">
         <header>
-            <h1>Live Orders Dashboard <span class="live-badge">LIVE</span></h1>
+            <h1>Admin Panel | Syrine's Crumble <span class="live-badge">LIVE</span></h1>
         </header>
 
         <div class="container">
@@ -1987,9 +2418,80 @@
                 </div>
             </div>
 
-            <footer>
-                <p>Automatically updates in real-time • No refresh needed</p>
-            </footer>
+            <!-- Vouchers Tab Content (hidden by default) -->
+            <div id="vouchers-tab-content" style="display: none;">
+                <div class="dashboard-stats">
+                    <div class="stat-card">
+                        <div class="stat-label">TOTAL VOUCHERS</div>
+                        <div class="stat-value" id="total-vouchers">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">ACTIVE VOUCHERS</div>
+                        <div class="stat-value" id="active-vouchers">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">FREE SHIPPING</div>
+                        <div class="stat-value" id="free-shipping-vouchers">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">On Item/s</div>
+                        <div class="stat-value" id="free-item-vouchers">0</div>
+                    </div>
+                </div>
+
+                <div class="controls">
+                    <button class="filter-btn active" data-filter-vouchers="all">
+                        <span>🎫</span> All Vouchers
+                    </button>
+                    <button class="filter-btn" data-filter-vouchers="free_shipping">
+                        <span>🚚</span> Free Shipping
+                    </button>
+                    <button class="filter-btn" data-filter-vouchers="free_item">
+                        <span>🎁</span> On Item/s
+                    </button>
+                    <button class="filter-btn" data-filter-vouchers="discount">
+                        <span>💰</span> Discounts
+                    </button>
+                    <button class="filter-btn" id="add-voucher-btn">
+                        <span>➕</span> Add New Voucher
+                    </button>
+
+                    <div class="search-container">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" class="search-box" placeholder="Search vouchers..."
+                            id="search-vouchers-input">
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th data-sort="id">ID ↕</th>
+                                <th data-sort="code">Code ↕</th>
+                                <th data-sort="free_shipping">Free Shipping ↕</th>
+                                <th data-sort="is_item">On Item/s ↕</th>
+                                <th data-sort="discount_rate">Discount Rate ↕</th>
+                                <th data-sort="discount_number">Discount Amount ↕</th>
+                                <th data-sort="total">Total Discount ↕</th>
+                                <th>Items</th>
+                                <th data-sort="is_active">Status ↕</th>
+                                <th data-sort="created_at">Created ↕</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vouchers-table">
+                            <tr>
+                                <td colspan="10">
+                                    <div class="loading">
+                                        <div class="loading-spinner"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -2038,6 +2540,107 @@
         </button>
     </div>
 
+    <!-- Add the invoice modal HTML at the bottom of the body, after the existing modals -->
+    <div class="modal invoice-modal" id="invoice-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Order Invoice</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="invoice-body" id="invoice-content">
+                <!-- Invoice content will be populated here -->
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn btn-secondary" id="close-invoice-btn">
+                    <span>✕</span> Close
+                </button>
+                <button class="modal-btn btn-primary" id="print-invoice-btn">
+                    <span>🖨️</span> Print Invoice
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Voucher Modal -->
+    <div class="modal" id="voucher-modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2 class="modal-title" id="voucher-modal-title">Add New Voucher</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="voucher-form" class="edit-form">
+                    <div class="form-group">
+                        <label for="voucher-code">Voucher Code:</label>
+                        <input type="text" id="voucher-code" required>
+                        <small>Unique code that customers will use</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="voucher-is-active" style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox" id="voucher-is-active" checked>
+                            <span>✅ Active Voucher</span>
+                        </label>
+                        <small>Uncheck to temporarily disable this voucher</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Voucher Type:</label>
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                            <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" id="voucher-free-shipping">
+                                <span>🚚 Free Shipping</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" id="voucher-free-item">
+                                <span>🎁 On Item/s</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" id="voucher-total">
+                                <span>💰 Total Order Discount</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="discount-rate-group" style="display: none;">
+                        <label for="voucher-discount-rate">Discount Rate (%):</label>
+                        <input type="number" id="voucher-discount-rate" min="0" max="100" step="0.1">
+                        <small>Percentage discount (0-100%)</small>
+                    </div>
+
+                    <div class="form-group" id="discount-amount-group" style="display: none;">
+                        <label for="voucher-discount-amount">Discount Amount (EGP):</label>
+                        <input type="number" id="voucher-discount-amount" min="0" step="0.01">
+                        <small>Fixed amount discount</small>
+                    </div>
+
+                    <div class="form-group" id="items-group" style="display: none;">
+                        <label for="voucher-items">Applicable Items:</label>
+                        <select id="voucher-items" multiple
+                            style="width: 100%; padding: 0.75rem; border: 1px solid var(--gray-light); border-radius: var(--border-radius-sm); min-height: 100px;">
+                            <option value="" disabled>Loading items...</option>
+                        </select>
+                        <small>Hold Ctrl/Cmd to select multiple items. Leave empty for all items.</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="voucher-description">Description (Optional):</label>
+                        <textarea id="voucher-description" rows="3"
+                            placeholder="Describe what this voucher offers..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn btn-secondary" id="cancel-voucher-btn">
+                    <span>✕</span> Cancel
+                </button>
+                <button class="modal-btn btn-primary" id="save-voucher-btn">
+                    <span>✓</span> Save Voucher
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Audio notification -->
     <audio id="notification-sound" src="sound.wav" preload="auto"></audio>
 
@@ -2047,6 +2650,27 @@
         let GITHUB_USERNAME = '';
         let GITHUB_REPO = '';
         let GITHUB_TOKEN = '';
+
+        // Vouchers tracking
+        let vouchers = []
+        let currentVouchersFilter = 'all'
+        let vouchersSearchQuery = ''
+        let selectedVoucher = null
+
+        // Add this section to the showOrderDetails function after the status update section
+        let invoiceActionsHTML = `
+    <div class="invoice-actions">
+        <button class="invoice-btn invoice-preview" id="preview-invoice-btn">
+            <span>👁️</span> Preview Invoice
+        </button>
+        <button class="invoice-btn invoice-download" id="download-invoice-btn">
+            <span>📥</span> Download Invoice
+        </button>
+        <button class="invoice-btn invoice-download" id="download-receipt-btn">
+            <span>🧾</span> Download Receipt
+        </button>
+    </div>
+`;
 
         const SUPABASE_URL = 'https://kegjyekbrxagrhidvyse.supabase.co'
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlZ2p5ZWticnhhZ3JoaWR2eXNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgxOTYzOTUsImV4cCI6MjA3Mzc3MjM5NX0.Lf_Jz-Q8GUM4XChuNJOJXffA_cGNA2vkgZ-41d08eL8'
@@ -2076,6 +2700,7 @@
         const sidebarTabs = document.querySelectorAll('.sidebar-tab')
         const ordersTabContent = document.getElementById('orders-tab-content')
         const cookiesTabContent = document.getElementById('cookies-tab-content')
+        const vouchersTabContent = document.getElementById('vouchers-tab-content')
         const cookiesTable = document.getElementById('cookies-table')
         const searchCookiesInput = document.getElementById('search-cookies-input')
 
@@ -2098,7 +2723,7 @@
         let cookies = []
         let currentCookiesFilter = 'all'
         let cookiesSearchQuery = ''
-        
+
         initializeApp();
 
 
@@ -2135,6 +2760,240 @@
             })
         })
 
+
+        // Function to generate restaurant/cafe receipt HTML
+        function generateInvoiceHTML(order, type = 'invoice') {
+            const items = order.items ? JSON.parse(order.items) : [];
+            const subtotal = order.total;
+            const tax = 0; // Adjust if you have tax
+            const total = subtotal + tax;
+
+            const currentDate = new Date().toLocaleDateString('en-EG', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+
+            const orderTime = new Date(order.created_at).toLocaleTimeString('en-EG', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            const orderDate = new Date(order.created_at).toLocaleDateString('en-EG', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+
+            return `
+        <div class="invoice-header">
+            <h1 class="invoice-title">Syrine's Crumble</h1>
+            <div class="invoice-subtitle">Order ${type === 'invoice' ? 'Invoice' : 'Receipt'}</div>
+        </div>
+        
+        <div class="invoice-info">
+            <div class="invoice-section">
+                <div class="invoice-section-title">Order Details</div>
+                <div class="invoice-row">
+                    <span class="invoice-label">Order #:</span>
+                    <span class="invoice-value">${order.id}</span>
+                </div>
+                <div class="invoice-row">
+                    <span class="invoice-label">Date:</span>
+                    <span class="invoice-value">${orderDate}</span>
+                </div>
+                <div class="invoice-row">
+                    <span class="invoice-label">Time:</span>
+                    <span class="invoice-value">${orderTime}</span>
+                </div>
+                <div class="invoice-row">
+                    <span class="invoice-label">Customer:</span>
+                    <span class="invoice-value">${order.customer_name}</span>
+                </div>
+                <div class="invoice-row">
+                    <span class="invoice-label">Payment:</span>
+                    <span class="invoice-value">${order.payment_method}</span>
+                </div>
+            </div>
+        </div>
+        
+        <table class="invoice-table">
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Qty</th>
+                    <th>Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${items.map(item => `
+                    <tr>
+                        <td class="item-name">${item.name}</td>
+                        <td>${item.quantity}</td>
+                        <td>${((item.amount_cents / 100) * item.quantity).toFixed(2)}</td>
+                    </tr>
+                    ${item.flavors && item.flavors.map(flavor => `
+                        <tr class="flavor-item">
+                            <td>+ ${flavor.flavor}</td>
+                            <td>${flavor.quantity}</td>
+                            <td>-</td>
+                        </tr>
+                    `).join('') || ''}
+                `).join('')}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="2" style="text-align: right; font-weight: bold;">Subtotal:</td>
+                    <td style="font-weight: bold;">${subtotal.toFixed(2)}</td>
+                </tr>
+                ${tax > 0 ? `
+                <tr>
+                    <td colspan="2" style="text-align: right; font-weight: bold;">Tax:</td>
+                    <td style="font-weight: bold;">${tax.toFixed(2)}</td>
+                </tr>
+                ` : ''}
+                <tr class="invoice-total">
+                    <td colspan="2" style="text-align: right;">TOTAL:</td>
+                    <td>EGP ${total.toFixed(2)}</td>
+                </tr>
+            </tfoot>
+        </table>
+        
+        ${order.address ? `
+        <div class="invoice-section">
+            <div class="invoice-section-title">Delivery Address</div>
+            <div class="invoice-row">
+                <span style="font-size: 0.8rem;">${order.address}</span>
+            </div>
+        </div>
+        ` : ''}
+        
+        ${order.special_instructions ? `
+        <div class="invoice-section">
+            <div class="invoice-section-title">Special Instructions</div>
+            <div class="invoice-row">
+                <span style="font-size: 0.8rem;">${order.special_instructions}</span>
+            </div>
+        </div>
+        ` : ''}
+        
+        <div class="invoice-footer">
+            <div class="thank-you">Thank you for your order!</div>
+            <div>Contact: +20 123 456 7890</div>
+            <div>Follow us on social media</div>
+            <div style="margin-top: 0.5rem;">* Please keep this receipt for your records *</div>
+        </div>
+    `;
+        }
+
+        // Function to show receipt preview
+        function showInvoicePreview(order, type = 'invoice') {
+            const invoiceModal = document.getElementById('invoice-modal');
+            const invoiceContent = document.getElementById('invoice-content');
+
+            // Update modal title based on type
+            const modalTitle = invoiceModal.querySelector('.modal-title');
+            modalTitle.textContent = type === 'invoice' ? 'Order Invoice' : 'Order Receipt';
+
+            // Generate and set receipt content
+            invoiceContent.innerHTML = generateInvoiceHTML(order, type);
+
+            // Show the modal
+            invoiceModal.style.display = 'flex';
+
+            // Set up event listeners for this modal
+            setupInvoiceModalEvents(order, type);
+        }
+
+        // Function to setup invoice modal events
+        function setupInvoiceModalEvents(order, type) {
+            const invoiceModal = document.getElementById('invoice-modal');
+            const closeInvoiceBtn = document.getElementById('close-invoice-btn');
+            const printInvoiceBtn = document.getElementById('print-invoice-btn');
+            const closeModalBtn = invoiceModal.querySelector('.close-modal');
+
+            const closeModal = () => {
+                invoiceModal.style.display = 'none';
+            };
+
+            closeInvoiceBtn.addEventListener('click', closeModal);
+            closeModalBtn.addEventListener('click', closeModal);
+
+            invoiceModal.addEventListener('click', (e) => {
+                if (e.target === invoiceModal) closeModal();
+            });
+
+            printInvoiceBtn.addEventListener('click', () => {
+                window.print();
+            });
+        }
+
+        // Function to download receipt as PDF
+        function downloadInvoice(order, type = 'invoice') {
+            // Create a printable version of the receipt
+            const invoiceHTML = generateInvoiceHTML(order, type);
+
+            // Create a new window with the receipt content
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>${type === 'invoice' ? 'Invoice' : 'Receipt'} #${order.id}</title>
+            <style>
+                @media print {
+                    @page {
+                        size: 80mm auto; /* Thermal receipt paper size */
+                        margin: 2mm;
+                    }
+                    body { 
+                        font-family: 'Courier New', monospace; 
+                        font-size: 12px; 
+                        margin: 0;
+                        padding: 2mm;
+                        width: 76mm;
+                    }
+                }
+                body { 
+                    font-family: 'Courier New', monospace; 
+                    font-size: 12px; 
+                    margin: 0;
+                    padding: 5mm;
+                    width: 70mm;
+                }
+                .invoice-header { text-align: center; margin-bottom: 3mm; border-bottom: 1px dashed #000; padding-bottom: 2mm; }
+                .invoice-title { font-size: 14px; font-weight: bold; margin-bottom: 1mm; text-transform: uppercase; }
+                .invoice-subtitle { font-size: 10px; color: #666; }
+                .invoice-info { margin-bottom: 3mm; }
+                .invoice-section-title { font-weight: bold; margin-bottom: 1mm; border-bottom: 1px dotted #000; padding-bottom: 1mm; font-size: 11px; text-transform: uppercase; }
+                .invoice-row { display: flex; justify-content: space-between; margin-bottom: 1mm; }
+                .invoice-table { width: 100%; border-collapse: collapse; margin: 2mm 0; font-size: 11px; }
+                .invoice-table th { background: #f5f5f5; padding: 1mm; text-align: left; font-weight: bold; border-bottom: 1px dashed #000; }
+                .invoice-table td { padding: 1mm; border-bottom: 1px dotted #eee; }
+                .invoice-table .item-name { font-weight: bold; }
+                .invoice-table .flavor-item { padding-left: 2mm; font-style: italic; color: #666; font-size: 10px; }
+                .invoice-total { background: #f5f5f5; font-weight: bold; border-top: 2px solid #000; border-bottom: 2px solid #000; }
+                .invoice-footer { text-align: center; margin-top: 3mm; padding-top: 2mm; border-top: 1px dashed #000; font-size: 10px; line-height: 1.2; }
+                .thank-you { font-weight: bold; margin: 2mm 0; }
+            </style>
+        </head>
+        <body>
+            ${invoiceHTML}
+            <script>
+                window.onload = function() {
+                    window.print();
+                    setTimeout(function() {
+                        window.close();
+                    }, 500);
+                };
+           <\/script>
+        </body>
+        </html>
+    `);
+
+            printWindow.document.close();
+        }
+
         // Toggle notification panel
         notificationHeader.addEventListener('click', () => {
             panelOpen = !panelOpen
@@ -2155,6 +3014,23 @@
             }
         })
 
+        document.addEventListener('click', function (e) {
+            if (e.target && (e.target.id === 'preview-invoice-btn' ||
+                e.target.id === 'download-invoice-btn' ||
+                e.target.id === 'download-receipt-btn')) {
+
+                if (!selectedOrder) return;
+
+                if (e.target.id === 'preview-invoice-btn') {
+                    showInvoicePreview(selectedOrder, 'invoice');
+                } else if (e.target.id === 'download-invoice-btn') {
+                    downloadInvoice(selectedOrder, 'invoice');
+                } else if (e.target.id === 'download-receipt-btn') {
+                    downloadInvoice(selectedOrder, 'receipt');
+                }
+            }
+        });
+
         // Theme toggle
         themeToggle.addEventListener('click', () => {
             document.body.classList.toggle('dark-mode')
@@ -2169,27 +3045,34 @@
             themeToggle.innerHTML = '<span>☀️</span>'
         }
 
-        // Tab switching functionality
+        // Update the tab switching to include vouchers
         sidebarTabs.forEach(tab => {
             tab.addEventListener('click', () => {
-                // Update active tab
                 sidebarTabs.forEach(t => t.classList.remove('active'))
                 tab.classList.add('active')
 
-                // Show/hide content based on selected tab
                 const tabName = tab.getAttribute('data-tab')
                 if (tabName === 'orders') {
                     ordersTabContent.style.display = 'block'
                     cookiesTabContent.style.display = 'none'
+                    vouchersTabContent.style.display = 'none'
                 } else if (tabName === 'cookies') {
                     ordersTabContent.style.display = 'none'
                     cookiesTabContent.style.display = 'block'
-
-                    // Load cookies data if not already loaded
+                    vouchersTabContent.style.display = 'none'
                     if (cookies.length === 0) {
                         loadCookies()
                     } else {
                         renderCookies()
+                    }
+                } else if (tabName === 'vouchers') {
+                    ordersTabContent.style.display = 'none'
+                    cookiesTabContent.style.display = 'none'
+                    vouchersTabContent.style.display = 'block'
+                    if (vouchers.length === 0) {
+                        loadVouchers()
+                    } else {
+                        renderVouchers()
                     }
                 }
             })
@@ -2218,6 +3101,499 @@
                 selectedStatus = null
             }
         })
+
+
+        // Load vouchers from Supabase
+        async function loadVouchers() {
+            try {
+                const vouchersTable = document.getElementById('vouchers-table')
+                vouchersTable.innerHTML = `
+            <tr>
+                <td colspan="10">
+                    <div class="loading">
+                        <div class="loading-spinner"></div>
+                    </div>
+                </td>
+            </tr>
+        `
+
+                const { data, error } = await supabase
+                    .from('vouchers')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+
+                if (error) {
+                    console.error('Error loading vouchers:', error)
+                    showToast('Error loading vouchers')
+                    return
+                }
+
+                vouchers = data
+                updateVouchersStats()
+                renderVouchers()
+
+            } catch (err) {
+                console.error('Failed to load vouchers:', err)
+                showToast('Failed to load vouchers')
+            }
+        }
+
+        // Update vouchers statistics
+        function updateVouchersStats() {
+            const totalVouchersEl = document.getElementById('total-vouchers')
+            const activeVouchersEl = document.getElementById('active-vouchers')
+            const freeShippingVouchersEl = document.getElementById('free-shipping-vouchers')
+            const freeItemVouchersEl = document.getElementById('free-item-vouchers')
+
+            totalVouchersEl.textContent = vouchers.length
+            activeVouchersEl.textContent = vouchers.filter(v => v.is_active !== false).length // Count active vouchers
+            freeShippingVouchersEl.textContent = vouchers.filter(v => v.free_shipping && v.is_active !== false).length
+            freeItemVouchersEl.textContent = vouchers.filter(v => v.is_item && v.is_active !== false).length
+        }
+
+        // Filter vouchers
+        function filterVouchers() {
+            return vouchers.filter(voucher => {
+                // Apply type filter
+                if (currentVouchersFilter !== 'all') {
+                    if (currentVouchersFilter === 'free_shipping' && !voucher.free_shipping) {
+                        return false
+                    }
+                    if (currentVouchersFilter === 'free_item' && !voucher.is_item) {
+                        return false
+                    }
+                    if (currentVouchersFilter === 'discount' && (!voucher.discount_rate && !voucher.discount_number)) {
+                        return false
+                    }
+                }
+
+                // Apply search filter
+                if (vouchersSearchQuery) {
+                    const searchTerm = vouchersSearchQuery.toLowerCase()
+                    const searchableFields = [
+                        voucher.id.toString(),
+                        voucher.code.toLowerCase(),
+                        voucher.discount_rate ? voucher.discount_rate.toString() : '',
+                        voucher.discount_number ? voucher.discount_number.toString() : '',
+                        voucher.items ? voucher.items.join(' ') : ''
+                    ]
+
+                    return searchableFields.some(field => field.includes(searchTerm))
+                }
+
+                return true
+            })
+        }
+
+        // Update the renderVouchers function
+        function renderVouchers() {
+            const filteredVouchers = filterVouchers()
+            const vouchersTable = document.getElementById('vouchers-table')
+
+            if (filteredVouchers.length === 0) {
+                vouchersTable.innerHTML = `
+            <tr>
+                <td colspan="11" style="text-align: center; padding: 2rem;">
+                    No vouchers found matching your criteria
+                </td>
+            </tr>
+        `
+                return
+            }
+
+            vouchersTable.innerHTML = ''
+
+            filteredVouchers.forEach(voucher => {
+                const row = document.createElement('tr')
+
+                // Format items for display
+                let itemsDisplay = 'All items'
+                if (voucher.items && voucher.items.length > 0) {
+                    if (voucher.items.length <= 3) {
+                        itemsDisplay = voucher.items.join(', ')
+                    } else {
+                        itemsDisplay = `${voucher.items.length} items`
+                    }
+                }
+
+                // Status badge with toggle functionality
+                const statusBadge = voucher.is_active ?
+                    '<span class="status-badge status-available" title="Active - Click to deactivate">Active</span>' :
+                    '<span class="status-badge status-out-of-stock" title="Inactive - Click to activate">Inactive</span>'
+
+                row.innerHTML = `
+            <td>${voucher.id}</td>
+            <td><strong class="voucher-code">${voucher.code}</strong></td>
+            <td>${voucher.free_shipping ? '✅ Yes' : '❌ No'}</td>
+            <td>${voucher.is_item ? '✅ Yes' : '❌ No'}</td>
+            <td>${voucher.discount_rate ? `${voucher.discount_rate}%` : '-'}</td>
+            <td>${voucher.discount_number ? `EGP ${voucher.discount_number}` : '-'}</td>
+            <td>${voucher.total ? '✅ Yes' : '❌ No'}</td>
+            <td title="${voucher.items ? voucher.items.join(', ') : 'All items'}">${itemsDisplay}</td>
+            <td class="status-cell">${statusBadge}</td>
+            <td>${formatDateTime(voucher.created_at)}</td>
+            <td>
+                <button class="action-btn edit-btn" data-id="${voucher.id}">Edit</button>
+                <button class="action-btn delete-btn" data-id="${voucher.id}">Delete</button>
+            </td>
+        `
+
+                // Add click event to status badge for quick toggle
+                const statusCell = row.querySelector('.status-cell')
+                statusCell.addEventListener('click', (e) => {
+                    e.stopPropagation()
+                    toggleVoucherStatus(voucher.id, !voucher.is_active)
+                })
+
+                // Add event listeners to action buttons
+                row.querySelector('.edit-btn').addEventListener('click', (e) => {
+                    e.stopPropagation()
+                    editVoucher(voucher.id)
+                })
+
+                row.querySelector('.delete-btn').addEventListener('click', (e) => {
+                    e.stopPropagation()
+                    deleteVoucher(voucher.id, voucher.code)
+                })
+
+                vouchersTable.appendChild(row)
+            })
+        }
+
+        // Toggle voucher status
+        async function toggleVoucherStatus(voucherId, newStatus) {
+            try {
+                const { error } = await supabase
+                    .from('vouchers')
+                    .update({ is_active: newStatus })
+                    .eq('id', voucherId)
+
+                if (error) {
+                    console.error('Error toggling voucher status:', error)
+                    showToast('Error updating voucher status')
+                    return
+                }
+
+                // Update local data
+                const voucherIndex = vouchers.findIndex(v => v.id === voucherId)
+                if (voucherIndex !== -1) {
+                    vouchers[voucherIndex].is_active = newStatus
+                }
+
+                showToast(`Voucher ${newStatus ? 'activated' : 'deactivated'} successfully`)
+                renderVouchers()
+                updateVouchersStats()
+
+            } catch (err) {
+                console.error('Failed to toggle voucher status:', err)
+                showToast('Failed to update voucher status')
+            }
+        }
+
+        // Enhanced show voucher modal function
+        function showVoucherModal(voucher = null) {
+            selectedVoucher = voucher
+            const modal = document.getElementById('voucher-modal')
+            const title = document.getElementById('voucher-modal-title')
+            const form = document.getElementById('voucher-form')
+
+            if (voucher) {
+                title.textContent = `Edit Voucher: ${voucher.code}`
+                // Populate form with existing data
+                document.getElementById('voucher-code').value = voucher.code
+                document.getElementById('voucher-free-shipping').checked = voucher.free_shipping
+                document.getElementById('voucher-free-item').checked = voucher.is_item
+                document.getElementById('voucher-total').checked = voucher.total
+                document.getElementById('voucher-discount-rate').value = voucher.discount_rate || ''
+                document.getElementById('voucher-discount-amount').value = voucher.discount_number || ''
+                document.getElementById('voucher-description').value = voucher.description || ''
+                document.getElementById('voucher-is-active').checked = voucher.is_active !== false // Default to true if null/undefined
+
+                // Populate items dropdown with previously selected items
+                const selectedItems = voucher.items || []
+                populateItemsDropdown(selectedItems)
+
+            } else {
+                title.textContent = 'Add New Voucher'
+                form.reset()
+                // Default is_active to true for new vouchers
+                document.getElementById('voucher-is-active').checked = true
+                // Populate items dropdown with no pre-selected items
+                populateItemsDropdown([])
+            }
+
+            // Show/hide relevant fields based on voucher type
+            updateVoucherFormVisibility()
+
+            // Set up readonly logic for discount fields
+            setupDiscountFieldsReadonly()
+
+            modal.style.display = 'flex'
+        }
+
+        // Setup readonly logic for discount fields
+        function setupDiscountFieldsReadonly() {
+            const discountRateInput = document.getElementById('voucher-discount-rate')
+            const discountAmountInput = document.getElementById('voucher-discount-amount')
+
+            // Clear any existing event listeners
+            discountRateInput.replaceWith(discountRateInput.cloneNode(true))
+            discountAmountInput.replaceWith(discountAmountInput.cloneNode(true))
+
+            // Get fresh references
+            const freshRateInput = document.getElementById('voucher-discount-rate')
+            const freshAmountInput = document.getElementById('voucher-discount-amount')
+
+            // Set initial readonly state based on current values
+            updateDiscountFieldsReadonly()
+
+            // Add event listeners for input changes
+            freshRateInput.addEventListener('input', updateDiscountFieldsReadonly)
+            freshAmountInput.addEventListener('input', updateDiscountFieldsReadonly)
+
+            // Also update on paste events
+            freshRateInput.addEventListener('paste', () => setTimeout(updateDiscountFieldsReadonly, 10))
+            freshAmountInput.addEventListener('paste', () => setTimeout(updateDiscountFieldsReadonly, 10))
+
+            // Update when fields become visible
+            freshRateInput.addEventListener('focus', updateDiscountFieldsReadonly)
+            freshAmountInput.addEventListener('focus', updateDiscountFieldsReadonly)
+        }
+
+        // Update readonly state of discount fields
+        function updateDiscountFieldsReadonly() {
+            const discountRateInput = document.getElementById('voucher-discount-rate')
+            const discountAmountInput = document.getElementById('voucher-discount-amount')
+
+            const hasRateValue = discountRateInput.value && discountRateInput.value.trim() !== '' && parseFloat(discountRateInput.value) > 0
+            const hasAmountValue = discountAmountInput.value && discountAmountInput.value.trim() !== '' && parseFloat(discountAmountInput.value) > 0
+
+            if (hasRateValue && hasAmountValue) {
+                // If both have values, clear the one that wasn't just edited
+                // We can't easily detect which one was just edited, so we'll clear the amount
+                discountAmountInput.value = ''
+                discountAmountInput.readOnly = true
+                discountRateInput.readOnly = false
+            } else if (hasRateValue) {
+                // If rate has value, make amount readonly
+                discountAmountInput.readOnly = true
+                discountRateInput.readOnly = false
+                discountAmountInput.placeholder = "Clear rate to enter amount"
+            } else if (hasAmountValue) {
+                // If amount has value, make rate readonly
+                discountRateInput.readOnly = true
+                discountAmountInput.readOnly = false
+                discountRateInput.placeholder = "Clear amount to enter rate"
+            } else {
+                // If both are empty, make both editable
+                discountRateInput.readOnly = false
+                discountAmountInput.readOnly = false
+                discountRateInput.placeholder = ""
+                discountAmountInput.placeholder = ""
+            }
+
+            // Update visual styling based on readonly state
+            updateDiscountFieldStyles()
+        }
+
+        // Update visual styling for discount fields
+        function updateDiscountFieldStyles() {
+            const discountRateInput = document.getElementById('voucher-discount-rate')
+            const discountAmountInput = document.getElementById('voucher-discount-amount')
+
+            if (discountRateInput.readOnly) {
+                discountRateInput.style.backgroundColor = '#f5f5f5'
+                discountRateInput.style.borderColor = '#ddd'
+                discountRateInput.style.color = '#999'
+                discountRateInput.style.cursor = 'not-allowed'
+            } else {
+                discountRateInput.style.backgroundColor = ''
+                discountRateInput.style.borderColor = ''
+                discountRateInput.style.color = ''
+                discountRateInput.style.cursor = ''
+            }
+
+            if (discountAmountInput.readOnly) {
+                discountAmountInput.style.backgroundColor = '#f5f5f5'
+                discountAmountInput.style.borderColor = '#ddd'
+                discountAmountInput.style.color = '#999'
+                discountAmountInput.style.cursor = 'not-allowed'
+            } else {
+                discountAmountInput.style.backgroundColor = ''
+                discountAmountInput.style.borderColor = ''
+                discountAmountInput.style.color = ''
+                discountAmountInput.style.cursor = ''
+            }
+        }
+
+
+        // Enhanced update form field visibility
+        function updateVoucherFormVisibility() {
+            const freeShipping = document.getElementById('voucher-free-shipping').checked
+            const freeItem = document.getElementById('voucher-free-item').checked
+            const totalDiscount = document.getElementById('voucher-total').checked
+
+            const discountRateGroup = document.getElementById('discount-rate-group')
+            const discountAmountGroup = document.getElementById('discount-amount-group')
+            const itemsGroup = document.getElementById('items-group')
+
+            // Show discount fields only for free items or total discounts
+            const showDiscountFields = freeItem || totalDiscount
+
+            discountRateGroup.style.display = showDiscountFields ? 'block' : 'none'
+            discountAmountGroup.style.display = showDiscountFields ? 'block' : 'none'
+            itemsGroup.style.display = freeItem ? 'block' : 'none'
+
+            // If discount fields are hidden, clear and enable them
+            if (!showDiscountFields) {
+                document.getElementById('voucher-discount-rate').value = ''
+                document.getElementById('voucher-discount-amount').value = ''
+                document.getElementById('voucher-discount-rate').readOnly = false
+                document.getElementById('voucher-discount-amount').readOnly = false
+                updateDiscountFieldStyles()
+            } else {
+                // If discount fields are shown, setup readonly logic
+                setupDiscountFieldsReadonly()
+            }
+
+            // If items group is shown and dropdown is empty, populate it
+            if (itemsGroup.style.display === 'block') {
+                const itemsDropdown = document.getElementById('voucher-items')
+                if (itemsDropdown.children.length <= 2) { // Only has loading/empty options
+                    const selectedItems = selectedVoucher ? selectedVoucher.items || [] : []
+                    populateItemsDropdown(selectedItems)
+                }
+            }
+        }
+
+        // Enhanced save voucher function
+        async function saveVoucher() {
+            try {
+                const code = document.getElementById('voucher-code').value.trim()
+                const freeShipping = document.getElementById('voucher-free-shipping').checked
+                const isItem = document.getElementById('voucher-free-item').checked
+                const total = document.getElementById('voucher-total').checked
+                const discountRate = document.getElementById('voucher-discount-rate').value
+                const discountNumber = document.getElementById('voucher-discount-amount').value
+                const itemsDropdown = document.getElementById('voucher-items')
+                const description = document.getElementById('voucher-description').value
+                const isActive = document.getElementById('voucher-is-active').checked
+
+                if (!code) {
+                    showToast('Voucher code is required')
+                    return
+                }
+
+                // Validate discount fields
+                if ((isItem || total) && !discountRate && !discountNumber) {
+                    showToast('Please enter either discount rate or discount amount for discount vouchers')
+                    return
+                }
+
+                if (discountRate && discountNumber) {
+                    showToast('Please enter only one: discount rate OR discount amount, not both')
+                    return
+                }
+
+                // Get selected items from dropdown
+                let selectedItems = []
+                if (isItem && itemsDropdown) {
+                    const selectedOptions = Array.from(itemsDropdown.selectedOptions)
+                    selectedItems = selectedOptions
+                        .map(option => option.value)
+                        .filter(value => value && value !== 'all') // Exclude "all" option and empty values
+
+                    // If "all" is selected or no items selected, set to null (apply to all items)
+                    const hasAllSelected = selectedOptions.some(option => option.value === 'all')
+                    if (hasAllSelected || selectedItems.length === 0) {
+                        selectedItems = null
+                    }
+                }
+
+                const voucherData = {
+                    code: code.toUpperCase(),
+                    free_shipping: freeShipping,
+                    is_item: isItem,
+                    total: total,
+                    discount_rate: discountRate ? parseFloat(discountRate) : null,
+                    discount_number: discountNumber ? parseFloat(discountNumber) : null,
+                    items: selectedItems, // This will be an array or null
+                    description: description || null,
+                    is_active: isActive
+                }
+
+                let error
+                if (selectedVoucher) {
+                    // Update existing voucher
+                    const { error: updateError } = await supabase
+                        .from('vouchers')
+                        .update(voucherData)
+                        .eq('id', selectedVoucher.id)
+                    error = updateError
+                } else {
+                    // Create new voucher
+                    const { error: insertError } = await supabase
+                        .from('vouchers')
+                        .insert([voucherData])
+                    error = insertError
+                }
+
+                if (error) {
+                    console.error('Error saving voucher:', error)
+                    showToast('Error saving voucher: ' + error.message)
+                    return
+                }
+
+                showToast(`Voucher ${selectedVoucher ? 'updated' : 'created'} successfully`)
+                document.getElementById('voucher-modal').style.display = 'none'
+
+                // Reset readonly states
+                const discountRateInput = document.getElementById('voucher-discount-rate')
+                const discountAmountInput = document.getElementById('voucher-discount-amount')
+                discountRateInput.readOnly = false
+                discountAmountInput.readOnly = false
+                updateDiscountFieldStyles()
+
+                loadVouchers()
+
+            } catch (err) {
+                console.error('Failed to save voucher:', err)
+                showToast('Failed to save voucher')
+            }
+        }
+
+        // Edit voucher
+        async function editVoucher(id) {
+            const voucher = vouchers.find(v => v.id === id)
+            if (voucher) {
+                showVoucherModal(voucher)
+            }
+        }
+
+        // Delete voucher
+        async function deleteVoucher(id, code) {
+            if (confirm(`Are you sure you want to delete voucher "${code}"? This action cannot be undone.`)) {
+                try {
+                    const { error } = await supabase
+                        .from('vouchers')
+                        .delete()
+                        .eq('id', id)
+
+                    if (error) {
+                        console.error('Error deleting voucher:', error)
+                        showToast('Error deleting voucher')
+                        return
+                    }
+
+                    showToast('Voucher deleted successfully')
+                    loadVouchers()
+
+                } catch (err) {
+                    console.error('Failed to delete voucher:', err)
+                    showToast('Failed to delete voucher')
+                }
+            }
+        }
 
         // Update status button handler - FIXED VERSION
         updateStatusBtn.addEventListener('click', async () => {
@@ -2542,6 +3918,197 @@
             }
         }
 
+        // Fetch all items from cookies, boxes, and mystery_boxes tables
+        async function fetchAllItems() {
+            try {
+                console.log('Starting to fetch items from Supabase...')
+
+                // Fetch cookies
+                const { data: cookiesData, error: cookiesError } = await supabase
+                    .from('cookies')
+                    .select('slug, name')
+                    .eq('is_active', true)
+
+                if (cookiesError) {
+                    console.error('Error fetching cookies:', cookiesError)
+                    throw cookiesError
+                }
+                console.log('Cookies fetched:', cookiesData)
+
+                // Fetch boxes
+                const { data: boxesData, error: boxesError } = await supabase
+                    .from('boxes')
+                    .select('slug, name')
+                    .eq('is_active', true)
+
+                if (boxesError) {
+                    console.error('Error fetching boxes:', boxesError)
+                    throw boxesError
+                }
+                console.log('Boxes fetched:', boxesData)
+
+                // Fetch mystery_boxes
+                let mysteryBoxesData = []
+                try {
+                    const { data: mysteryData, error: mysteryError } = await supabase
+                        .from('mystery_boxes')
+                        .select('slug, name')
+                        .eq('is_active', true)
+
+                    if (mysteryError) {
+                        console.log('Mystery boxes error (table might not exist):', mysteryError)
+                    } else {
+                        mysteryBoxesData = mysteryData || []
+                        console.log('Mystery boxes fetched:', mysteryBoxesData)
+                    }
+                } catch (e) {
+                    console.log('Mystery boxes table not found:', e)
+                }
+
+                // Combine all items with correct structure
+                const allItems = [
+                    ...(cookiesData || []).map(item => ({
+                        slug: item.slug,
+                        name: item.name,
+                        displayName: `${item.name} (Cookie)`,
+                        table: 'cookies'
+                    })),
+                    ...(boxesData || []).map(item => ({
+                        slug: item.slug,
+                        name: item.name,
+                        displayName: `${item.name} (Box)`,
+                        table: 'boxes'
+                    })),
+                    ...(mysteryBoxesData || []).map(item => ({
+                        slug: item.slug,
+                        name: item.name,
+                        displayName: `${item.name} (Mystery Box)`,
+                        table: 'mystery_boxes'
+                    }))
+                ]
+
+                console.log('Combined items:', allItems)
+                return allItems
+
+            } catch (error) {
+                console.error('Error fetching items:', error)
+                showToast('Error loading items from database')
+                return []
+            }
+        }
+
+        // Populate items dropdown
+        async function populateItemsDropdown(selectedItems = []) {
+            const itemsDropdown = document.getElementById('voucher-items')
+
+            // Show loading state
+            itemsDropdown.innerHTML = '<option value="" disabled class="loading-dropdown">Loading items...</option>'
+            itemsDropdown.disabled = true
+
+            try {
+                const items = await fetchAllItems()
+
+                // Clear dropdown
+                itemsDropdown.innerHTML = ''
+
+                if (items.length === 0) {
+                    itemsDropdown.innerHTML = '<option value="" disabled>No items found</option>'
+                    return
+                }
+
+                // Add "All Items" option
+                const allOption = document.createElement('option')
+                allOption.value = 'all'
+                allOption.textContent = '🎁 All Items'
+                allOption.title = 'Apply to all items'
+                itemsDropdown.appendChild(allOption)
+
+                // Add separator
+                const separator = document.createElement('option')
+                separator.disabled = true
+                separator.textContent = '──────────────────'
+                itemsDropdown.appendChild(separator)
+
+                // Group items by type
+                const groupedItems = {
+                    cookies: items.filter(item => item.table === 'cookies'),
+                    boxes: items.filter(item => item.table === 'boxes'),
+                    mystery_boxes: items.filter(item => item.table === 'mystery_boxes')
+                }
+
+                // Add cookies
+                if (groupedItems.cookies.length > 0) {
+                    const cookieHeader = document.createElement('option')
+                    cookieHeader.disabled = true
+                    cookieHeader.textContent = '🍪 COOKIES'
+                    itemsDropdown.appendChild(cookieHeader)
+
+                    groupedItems.cookies.forEach(item => {
+                        const option = document.createElement('option')
+                        option.value = item.slug
+                        option.textContent = `   ${item.name}`
+                        option.title = `Cookie: ${item.name}`
+
+                        // Set selected if this item was previously selected
+                        if (selectedItems.includes(item.slug)) {
+                            option.selected = true
+                        }
+
+                        itemsDropdown.appendChild(option)
+                    })
+                }
+
+                // Add boxes
+                if (groupedItems.boxes.length > 0) {
+                    const boxHeader = document.createElement('option')
+                    boxHeader.disabled = true
+                    boxHeader.textContent = '📦 BOXES'
+                    itemsDropdown.appendChild(boxHeader)
+
+                    groupedItems.boxes.forEach(item => {
+                        const option = document.createElement('option')
+                        option.value = item.slug
+                        option.textContent = `   ${item.name}`
+                        option.title = `Box: ${item.name}`
+
+                        if (selectedItems.includes(item.slug)) {
+                            option.selected = true
+                        }
+
+                        itemsDropdown.appendChild(option)
+                    })
+                }
+
+                // Add mystery boxes
+                if (groupedItems.mystery_boxes.length > 0) {
+                    const mysteryHeader = document.createElement('option')
+                    mysteryHeader.disabled = true
+                    mysteryHeader.textContent = '🎁 MYSTERY BOXES'
+                    itemsDropdown.appendChild(mysteryHeader)
+
+                    groupedItems.mystery_boxes.forEach(item => {
+                        const option = document.createElement('option')
+                        option.value = item.slug
+                        option.textContent = `   ${item.name}`
+                        option.title = `Mystery Box: ${item.name}`
+
+                        if (selectedItems.includes(item.slug)) {
+                            option.selected = true
+                        }
+
+                        itemsDropdown.appendChild(option)
+                    })
+                }
+
+                // Enable dropdown
+                itemsDropdown.disabled = false
+
+            } catch (error) {
+                console.error('Error populating items dropdown:', error)
+                itemsDropdown.innerHTML = '<option value="" disabled>Error loading items</option>'
+            }
+        }
+
         // Get stock status class for cookies/boxes
         function getStockStatusClass(stock) {
             if (stock === 0) return 'status-out-of-stock';
@@ -2564,183 +4131,273 @@
             }
         }
 
-        // Enhanced showOrderDetails function
+        // Enhanced showOrderDetails function with voucher and financial details
         function showOrderDetails(order) {
             // Reset scroll to top immediately after content is set
             resetModalScroll();
-
             setTimeout(resetModalScroll, 10);
-            selectedOrder = order
-            const items = order.items ? JSON.parse(order.items) : []
+
+            selectedOrder = order;
+            console.log("Order details:", order);
+            const items = order.items ? JSON.parse(order.items) : [];
 
             // Create status progress bar
-            const statusSteps = ['Pending', 'confirmed', 'preparing', 'delivering', 'completed']
-            const currentStatusIndex = statusSteps.indexOf(order.status.toLowerCase())
+            const statusSteps = ['Pending', 'confirmed', 'preparing', 'delivering', 'completed'];
+            const currentStatusIndex = statusSteps.indexOf(order.status.toLowerCase());
             const isFinalStatus = order.status.toLowerCase() === 'cancel' || order.status.toLowerCase() === 'failed';
 
             let progressHTML = `
-                <div class="status-section">
-                    <div class="section-title">📊 Order Progress</div>
-                    <div class="status-progress-container">
-                        <div class="status-progress-line">
-                            <div class="status-progress-fill" style="width: ${(currentStatusIndex / (statusSteps.length - 1)) * 100}%"></div>
-                        </div>
-                        <div class="status-progress">
-            `
+        <div class="status-section">
+            <div class="section-title">📊 Order Progress</div>
+            <div class="status-progress-container">
+                <div class="status-progress-line">
+                    <div class="status-progress-fill" style="width: ${(currentStatusIndex / (statusSteps.length - 1)) * 100}%"></div>
+                </div>
+                <div class="status-progress">
+    `;
 
             statusSteps.forEach((step, index) => {
-                let statusClass = ''
-                if (index < currentStatusIndex) statusClass = 'completed'
-                else if (index === currentStatusIndex) statusClass = 'active'
+                let statusClass = '';
+                if (index < currentStatusIndex) statusClass = 'completed';
+                else if (index === currentStatusIndex) statusClass = 'active';
 
-                progressHTML += `<div class="status-step ${statusClass}">${index + 1}</div>`
-            })
+                progressHTML += `<div class="status-step ${statusClass}">${index + 1}</div>`;
+            });
 
             progressHTML += `
-                        </div>
-                        <div class="status-labels">
-                            <div class="status-label ${0 === currentStatusIndex ? 'active' : ''}">Pending</div>
-                            <div class="status-label ${1 === currentStatusIndex ? 'active' : ''}">Confirmed</div>
-                            <div class="status-label ${2 === currentStatusIndex ? 'active' : ''}">Preparing</div>
-                            <div class="status-label ${3 === currentStatusIndex ? 'active' : ''}">Delivering</div>
-                            <div class="status-label ${4 === currentStatusIndex ? 'active' : ''}">Completed</div>
-                        </div>
-                    </div>
                 </div>
-            `
+                <div class="status-labels">
+                    <div class="status-label ${0 === currentStatusIndex ? 'active' : ''}">Pending</div>
+                    <div class="status-label ${1 === currentStatusIndex ? 'active' : ''}">Confirmed</div>
+                    <div class="status-label ${2 === currentStatusIndex ? 'active' : ''}">Preparing</div>
+                    <div class="status-label ${3 === currentStatusIndex ? 'active' : ''}">Delivering</div>
+                    <div class="status-label ${4 === currentStatusIndex ? 'active' : ''}">Completed</div>
+                </div>
+            </div>
+        </div>
+    `;
 
             // Customer and order info
             let customerInfoHTML = `
-                <div class="modal-section">
-                    <div class="section-title">👤 Customer Information</div>
-                    <div class="order-info-grid">
-                        <div class="info-item">
-                            <div class="info-label"><span>🆔</span> Order ID</div>
-                            <div class="info-value">#${order.id}</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label"><span>👤</span> Customer Name</div>
-                            <div class="info-value">${order.customer_name}</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label"><span>📞</span> Phone</div>
-                            <div class="info-value">${order.phone}</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label"><span>💰</span> Total Amount</div>
-                            <div class="info-value">EGP ${order.total}</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label"><span>💳</span> Payment Method</div>
-                            <div class="info-value">${order.payment_method}</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label"><span>🕒</span> Order Time</div>
-                            <div class="info-value">${formatDateTime(order.created_at)}</div>
-                        </div>
+        <div class="modal-section">
+            <div class="section-title">👤 Customer Information</div>
+            <div class="order-info-grid">
+                <div class="info-item">
+                    <div class="info-label"><span>🆔</span> Order ID</div>
+                    <div class="info-value">#${order.id}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label"><span>👤</span> Customer Name</div>
+                    <div class="info-value">${order.customer_name}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label"><span>📞</span> Phone</div>
+                    <div class="info-value">${order.phone}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label"><span>📧</span> Email</div>
+                    <div class="info-value">${order.email || 'N/A'}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label"><span>💳</span> Payment Method</div>
+                    <div class="info-value">${order.payment_method}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label"><span>🕒</span> Order Time</div>
+                    <div class="info-value">${formatDateTime(order.created_at)}</div>
+                </div>
+            </div>
+        </div>
+    `;
+
+            // Financial Breakdown Section
+            const subtotal = order.subtotal || items.reduce((sum, item) => sum + ((item.amount_cents || item.price * 100) / 100 * item.quantity), 0);
+            const discount = order.discount || 0;
+            const shippingCost = order.shipping_cost || 0;
+            const freeShipping = order.free_shipping || false;
+            const total = order.total || subtotal - discount + shippingCost;
+
+            let financialInfoHTML = `
+        <div class="modal-section">
+            <div class="section-title">💰 Financial Breakdown</div>
+            <div class="order-info-grid">
+                <div class="info-item">
+                    <div class="info-label"><span>📦</span> Subtotal</div>
+                    <div class="info-value">EGP ${subtotal.toFixed(2)}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label"><span>🚚</span> Shipping</div>
+                    <div class="info-value">${freeShipping || shippingCost === 0 ? 'FREE' : `EGP ${shippingCost.toFixed(2)}`}</div>
+                </div>
+    `;
+
+            // Add discount if applicable
+            if (discount > 0) {
+                financialInfoHTML += `
+                <div class="info-item">
+                    <div class="info-label"><span>🎫</span> Discount</div>
+                    <div class="info-value" style="color: var(--success);">-EGP ${discount.toFixed(2)}</div>
+                </div>
+        `;
+            }
+
+            financialInfoHTML += `
+                <div class="info-item">
+                    <div class="info-label"><span>💰</span> Total Amount</div>
+                    <div class="info-value highlight-value">EGP ${total.toFixed(2)}</div>
+                </div>
+            </div>
+        </div>
+    `;
+
+            // Voucher Information Section (if voucher was used)
+            let voucherInfoHTML = '';
+            if (order.voucher_code || order.voucher_id) {
+                voucherInfoHTML = `
+            <div class="modal-section">
+                <div class="section-title">🎫 Voucher Information</div>
+                <div class="order-info-grid">
+                    <div class="info-item">
+                        <div class="info-label"><span>🏷️</span> Voucher Code</div>
+                        <div class="info-value voucher-code">${order.voucher_code || 'N/A'}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label"><span>🆔</span> Voucher ID</div>
+                        <div class="info-value">${order.voucher_id || 'N/A'}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label"><span>📊</span> Discount Applied</div>
+                        <div class="info-value" style="color: var(--success);">EGP ${discount.toFixed(2)}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label"><span>🚚</span> Free Shipping</div>
+                        <div class="info-value">${freeShipping ? '✅ Yes' : '❌ No'}</div>
                     </div>
                 </div>
-            `
+            </div>
+        `;
+            }
 
             // Delivery information
             let deliveryInfoHTML = `
-                <div class="modal-section">
-                    <div class="section-title">🚚 Delivery Information</div>
-                    <div class="info-item">
-                        <div class="info-label"><span>🏠</span> Delivery Address</div>
-                        <div class="info-value">${order.address || 'N/A'}</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label"><span>📝</span> Special Instructions</div>
-                        <div class="info-value">${order.special_instructions || 'None'}</div>
-                    </div>
-                </div>
-            `
+        <div class="modal-section">
+            <div class="section-title">🚚 Delivery Information</div>
+            <div class="info-item">
+                <div class="info-label"><span>🏠</span> Delivery Address</div>
+                <div class="info-value">${order.address || 'N/A'}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label"><span>📝</span> Special Instructions</div>
+                <div class="info-value">${order.special_instructions || 'None'}</div>
+            </div>
+        </div>
+    `;
 
             // Order items
             let itemsHTML = `
-                <div class="modal-section">
-                    <div class="section-title">📦 Order Items</div>
-                    <div class="items-container">
-            `
+        <div class="modal-section">
+            <div class="section-title">📦 Order Items (${items.length})</div>
+            <div class="items-container">
+    `;
 
             if (items.length === 0) {
-                itemsHTML += `<div class="info-value" style="text-align: center; padding: 1rem;">No items in this order</div>`
+                itemsHTML += `<div class="info-value" style="text-align: center; padding: 1rem;">No items in this order</div>`;
             } else {
                 items.forEach(item => {
+                    const itemPrice = item.amount_cents ? item.amount_cents / 100 : item.price || 0;
+                    const itemTotal = itemPrice * item.quantity;
+
                     itemsHTML += `
-                        <div class="item-card">
-                            <div class="item-header">
-                                <div class="item-name">${item.name}</div>
-                                <div class="item-quantity">x${item.quantity}</div>
-                            </div>
-                            <div class="item-details">
-                                <div class="item-price">EGP ${item.amount_cents ? (item.amount_cents / 100) * item.quantity : '0'}</div>
-                            </div>
-                    `
+                <div class="item-card">
+                    <div class="item-header">
+                        <div class="item-name">${item.name}</div>
+                        <div class="item-quantity">x${item.quantity}</div>
+                    </div>
+                    <div class="item-details">
+                        <div class="item-price">EGP ${itemTotal.toFixed(2)}</div>
+                    </div>
+            `;
 
                     // Add flavors if they exist
                     if (item.flavors && item.flavors.length > 0) {
-                        itemsHTML += `<div class="flavor-list">`
+                        itemsHTML += `<div class="flavor-list">`;
                         item.flavors.forEach(flavor => {
                             itemsHTML += `
-                                <div class="flavor-item">
-                                    <span>+ ${flavor.flavor}</span>
-                                    <span>x${flavor.quantity}</span>
-                                </div>
-                            `
-                        })
-                        itemsHTML += `</div>`
+                        <div class="flavor-item">
+                            <span>+ ${flavor.flavor} - ${flavor.type}</span>
+                            <span>x${flavor.quantity}</span>
+                        </div>
+                    `;
+                        });
+                        itemsHTML += `</div>`;
                     }
 
-                    itemsHTML += `</div>`
-                })
+                    itemsHTML += `</div>`;
+                });
             }
 
-            itemsHTML += `</div></div>`
+            itemsHTML += `</div></div>`;
 
             // Status update section
             let statusUpdateHTML = `
-                <div class="status-update-section">
-                    <div class="section-title">🔄 Update Order Status</div>
-                    <div class="status-options">
-                        <div class="status-option" data-status="Pending">
-                            <span>⏳</span> Pending
-                        </div>
-                        <div class="status-option" data-status="Confirmed">
-                            <span>✅</span> Confirmed
-                        </div>
-                        <div class="status-option" data-status="Preparing">
-                            <span>👨‍🍳</span> Preparing
-                        </div>
-                        <div class="status-option" data-status="Delivering">
-                            <span>🚚</span> Delivering
-                        </div>
-                        <div class="status-option" data-status="Completed">
-                            <span>🎉</span> Completed
-                        </div>
-                        <div class="status-option" data-status="Cancelled">
-                            <span>❌</span> Cancelled
-                        </div>
-                        <div class="status-option" data-status="Failed">
-                            <span>⚠️</span> Failed
-                        </div>
-                    </div>
+        <div class="status-update-section">
+            <div class="section-title">🔄 Update Order Status</div>
+            <div class="status-options">
+                <div class="status-option" data-status="Pending">
+                    <span>⏳</span> Pending
                 </div>
-            `
+                <div class="status-option" data-status="Confirmed">
+                    <span>✅</span> Confirmed
+                </div>
+                <div class="status-option" data-status="Preparing">
+                    <span>👨‍🍳</span> Preparing
+                </div>
+                <div class="status-option" data-status="Delivering">
+                    <span>🚚</span> Delivering
+                </div>
+                <div class="status-option" data-status="Completed">
+                    <span>🎉</span> Completed
+                </div>
+                <div class="status-option" data-status="Cancelled">
+                    <span>❌</span> Cancelled
+                </div>
+                <div class="status-option" data-status="Failed">
+                    <span>⚠️</span> Failed
+                </div>
+            </div>
+        </div>
+    `;
+
+            // Invoice actions section
+            let invoiceActionsHTML = `
+        <div class="invoice-actions">
+            <button class="invoice-btn invoice-preview" id="preview-invoice-btn">
+                <span>👁️</span> Preview Invoice
+            </button>
+            <button class="invoice-btn invoice-download" id="download-invoice-btn">
+                <span>📥</span> Download Invoice
+            </button>
+            <button class="invoice-btn invoice-download" id="download-receipt-btn">
+                <span>🧾</span> Download Receipt
+            </button>
+        </div>
+    `;
 
             // Combine all sections
             modalBody.innerHTML = `
-                ${progressHTML}
-                <div>
-                    ${customerInfoHTML}
-                    ${deliveryInfoHTML}
-                </div>
-                <div>
-                    ${itemsHTML}
-                    ${statusUpdateHTML}
-                </div>
-            `
+        ${progressHTML}
+        <div>
+            ${customerInfoHTML}
+            ${financialInfoHTML}
+            ${voucherInfoHTML}
+            ${deliveryInfoHTML}
+        </div>
+        <div>
+            ${itemsHTML}
+            ${statusUpdateHTML}
+            ${invoiceActionsHTML} 
+        </div>
+    `;
 
             // Set up status option event listeners
             document.querySelectorAll('.status-option').forEach(opt => {
@@ -2761,12 +4418,37 @@
                     document.querySelectorAll('.status-option').forEach(option => option.classList.remove('selected'));
                     opt.classList.add('selected');
                     selectedStatus = opt.getAttribute('data-status');
-                    console.log("Selected status:", selectedStatus); // Debug log
+                    console.log("Selected status:", selectedStatus);
                 });
             });
 
-            orderModal.style.display = 'flex'
+            setTimeout(() => {
+                const previewInvoiceBtn = document.getElementById('preview-invoice-btn');
+                const downloadInvoiceBtn = document.getElementById('download-invoice-btn');
+                const downloadReceiptBtn = document.getElementById('download-receipt-btn');
+
+                if (previewInvoiceBtn) {
+                    previewInvoiceBtn.addEventListener('click', () => {
+                        showInvoicePreview(order, 'invoice');
+                    });
+                }
+
+                if (downloadInvoiceBtn) {
+                    downloadInvoiceBtn.addEventListener('click', () => {
+                        downloadInvoice(order, 'invoice');
+                    });
+                }
+
+                if (downloadReceiptBtn) {
+                    downloadReceiptBtn.addEventListener('click', () => {
+                        downloadInvoice(order, 'receipt');
+                    });
+                }
+            }, 100);
+
+            orderModal.style.display = 'flex';
         }
+
 
         // Filter orders based on current filter and search
         function filterOrders() {
@@ -2851,6 +4533,7 @@
 
             tableBody.innerHTML = ''
 
+            console.log("filteredOrders", filteredOrders)
             filteredOrders.forEach(order => {
                 const row = document.createElement('tr')
                 // Don't add new-order class for existing orders
@@ -3865,6 +5548,33 @@
                 })
             })
 
+            // Refresh items dropdown when free item checkbox is checked
+            document.getElementById('voucher-free-item').addEventListener('change', function () {
+                if (this.checked) {
+                    const selectedItems = selectedVoucher ? selectedVoucher.items || [] : []
+                    populateItemsDropdown(selectedItems)
+                }
+            })
+
+            // Handle "All Items" selection logic
+            document.getElementById('voucher-items').addEventListener('change', function () {
+                const selectedOptions = Array.from(this.selectedOptions)
+                const hasAllSelected = selectedOptions.some(option => option.value === 'all')
+
+                if (hasAllSelected) {
+                    // If "All Items" is selected, deselect all other options and select only "All Items"
+                    Array.from(this.options).forEach(option => {
+                        option.selected = option.value === 'all'
+                    })
+                } else if (selectedOptions.length > 0) {
+                    // If specific items are selected, ensure "All Items" is not selected
+                    const allOption = Array.from(this.options).find(option => option.value === 'all')
+                    if (allOption) {
+                        allOption.selected = false
+                    }
+                }
+            })
+
             // Filter buttons for cookies
             document.querySelectorAll('.filter-btn[data-filter-cookies]').forEach(btn => {
                 btn.addEventListener('click', () => {
@@ -3897,6 +5607,81 @@
             // Add new item button
             document.getElementById('add-item-btn').addEventListener('click', () => {
                 showToast('Add new item functionality would go here')
+            })
+
+            // Vouchers filter buttons
+            document.querySelectorAll('.filter-btn[data-filter-vouchers]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.filter-btn[data-filter-vouchers]').forEach(b => b.classList.remove('active'))
+                    btn.classList.add('active')
+                    currentVouchersFilter = btn.dataset.filterVouchers
+                    renderVouchers()
+                })
+            })
+
+            // Vouchers search input
+            document.getElementById('search-vouchers-input').addEventListener('input', () => {
+                vouchersSearchQuery = document.getElementById('search-vouchers-input').value
+                renderVouchers()
+            })
+
+            // Add voucher button
+            document.getElementById('add-voucher-btn').addEventListener('click', () => {
+                showVoucherModal()
+            })
+
+            // Voucher modal events
+            document.getElementById('cancel-voucher-btn').addEventListener('click', () => {
+                document.getElementById('voucher-modal').style.display = 'none'
+                // Reset readonly states when closing modal
+                const discountRateInput = document.getElementById('voucher-discount-rate')
+                const discountAmountInput = document.getElementById('voucher-discount-amount')
+                discountRateInput.readOnly = false
+                discountAmountInput.readOnly = false
+                updateDiscountFieldStyles()
+            })
+
+            document.querySelector('#voucher-modal .close-modal').addEventListener('click', () => {
+                document.getElementById('voucher-modal').style.display = 'none'
+                // Reset readonly states when closing modal
+                const discountRateInput = document.getElementById('voucher-discount-rate')
+                const discountAmountInput = document.getElementById('voucher-discount-amount')
+                discountRateInput.readOnly = false
+                discountAmountInput.readOnly = false
+                updateDiscountFieldStyles()
+            })
+
+            document.getElementById('save-voucher-btn').addEventListener('click', saveVoucher)
+
+            // Voucher type change events
+            document.getElementById('voucher-free-shipping').addEventListener('change', updateVoucherFormVisibility)
+            document.getElementById('voucher-free-item').addEventListener('change', updateVoucherFormVisibility)
+            document.getElementById('voucher-total').addEventListener('change', updateVoucherFormVisibility)
+
+            // Close voucher modal on background click
+            document.getElementById('voucher-modal').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('voucher-modal')) {
+                    document.getElementById('voucher-modal').style.display = 'none'
+                    // Reset readonly states when closing modal
+                    const discountRateInput = document.getElementById('voucher-discount-rate')
+                    const discountAmountInput = document.getElementById('voucher-discount-amount')
+                    discountRateInput.readOnly = false
+                    discountAmountInput.readOnly = false
+                    updateDiscountFieldStyles()
+                }
+            })
+
+
+            // Clear discount fields when voucher type changes away from discount types
+            document.getElementById('voucher-free-shipping').addEventListener('change', function () {
+                if (!this.checked) {
+                    const freeItem = document.getElementById('voucher-free-item').checked
+                    const totalDiscount = document.getElementById('voucher-total').checked
+                    if (!freeItem && !totalDiscount) {
+                        document.getElementById('voucher-discount-rate').value = ''
+                        document.getElementById('voucher-discount-amount').value = ''
+                    }
+                }
             })
         }
 
@@ -4052,6 +5837,59 @@
                         showToast(`Order #${payload.new.id} status updated to ${payload.new.status}`)
                     }
                 }
+            })
+            .subscribe()
+
+        // Real-time subscription for new vouchers
+        supabase
+            .channel('vouchers')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'vouchers' }, payload => {
+                console.log('New voucher received:', payload.new)
+                vouchers.unshift(payload.new)
+                updateVouchersStats()
+                renderVouchers()
+                showToast(`New voucher added: ${payload.new.code}`)
+            })
+            .subscribe()
+
+        // Real-time subscription for voucher updates
+        supabase
+            .channel('voucher-updates')
+            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'vouchers' }, payload => {
+                console.log('Voucher updated:', payload.new)
+                const voucherIndex = vouchers.findIndex(v => v.id === payload.new.id)
+                if (voucherIndex !== -1) {
+                    vouchers[voucherIndex] = payload.new
+                    updateVouchersStats()
+                    renderVouchers()
+                }
+            })
+            .subscribe()
+
+
+        // Real-time subscription for voucher status updates
+        supabase
+            .channel('voucher-status-updates')
+            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'vouchers' }, payload => {
+                console.log('Voucher status updated:', payload.new)
+                const voucherIndex = vouchers.findIndex(v => v.id === payload.new.id)
+                if (voucherIndex !== -1) {
+                    vouchers[voucherIndex] = payload.new
+                    updateVouchersStats()
+                    renderVouchers()
+                }
+            })
+            .subscribe()
+
+        // Real-time subscription for voucher deletions
+        supabase
+            .channel('voucher-deletions')
+            .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'vouchers' }, payload => {
+                console.log('Voucher deleted:', payload.old)
+                vouchers = vouchers.filter(v => v.id !== payload.old.id)
+                updateVouchersStats()
+                renderVouchers()
+                showToast(`Voucher deleted: ${payload.old.code}`)
             })
             .subscribe()
     </script>
