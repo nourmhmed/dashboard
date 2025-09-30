@@ -5417,13 +5417,13 @@
             }
 
             try {
-                console.log("Updating order:", selectedOrder.id, "to status:", selectedStatus)
+                console.log("Updating order:", selectedOrder.order_id, "to status:", selectedStatus)
 
                 // Update the order status in the database - FIXED: using selectedStatus instead of selectedOrder.status
                 const { error } = await supabase
                     .from('orders')
                     .update({ status: selectedStatus }) // FIXED: Changed from selectedOrder.status to selectedStatus
-                    .eq('id', selectedOrder.id)
+                    .eq('order_id', selectedOrder.order_id)
 
                 if (error) {
                     console.error('Error updating order status:', error)
@@ -5443,7 +5443,7 @@
                 updateStats()
 
                 // Close the modal and show success message
-                showToast(`Order #${selectedOrder.id} status updated to ${selectedStatus}`) // FIXED: Changed from selectedOrder.status to selectedStatus
+                showToast(`Order #${selectedOrder.order_id} status updated to ${selectedStatus}`) // FIXED: Changed from selectedOrder.status to selectedStatus
                 orderModal.style.display = 'none'
 
                 // Reset status selection
@@ -5533,7 +5533,7 @@
 
         function showToast(message) {
             toast.textContent = message
-            toast.style.display = 'block'
+            toast.style.display = 'inline'
             setTimeout(() => toast.style.display = 'none', 4000)
         }
 
@@ -6390,7 +6390,7 @@
                 tableBody.appendChild(row)
             })
         }
-        // Update the editItem function to handle variants
+        // Update the editItem function to handle box variants
         async function editItem(id, type, variant = null) {
             try {
                 // Fetch the specific item details
@@ -6415,7 +6415,7 @@
             }
         }
 
-        // Update the showEditModal function to handle cookie variants
+        // Update the showEditModal function to handle box variants
         function showEditModal(item, type, variant = null) {
             let modalHTML = `
         <div class="modal" id="edit-item-modal">
@@ -6484,19 +6484,38 @@
             </div>
         `
             } else {
+                // Box editing form
                 modalHTML += `
             <div class="form-group">
                 <label for="edit-name">Name:</label>
                 <input type="text" id="edit-name" value="${item.name || ''}" required>
             </div>
             <div class="form-group">
-                <label for="edit-price">Price (EGP):</label>
-                <input type="number" id="edit-price" step="0.01" value="${item.price || item.cost || 0}" required>
+                <label for="edit-size">Size:</label>
+                <input type="text" id="edit-size" value="${item.size || ''}" required>
             </div>
             <div class="form-group">
-                <label for="edit-stock">Stock:</label>
-                <input type="number" id="edit-stock" value="${item.stock || item.quantity || 0}" required>
+                <label for="edit-cookie-count">Cookie Count:</label>
+                <input type="number" id="edit-cookie-count" value="${item.cookie_count || 0}" required>
             </div>
+            ${variant === 'chewy' ? `
+            <div class="form-group">
+                <label for="edit-chewy-price">Chewy Price (EGP):</label>
+                <input type="number" id="edit-chewy-price" step="0.01" value="${item.chewy_price || 0}" required>
+            </div>
+            ` : ''}
+            ${variant === 'crumble' ? `
+            <div class="form-group">
+                <label for="edit-crumble-price">Crumble Price (EGP):</label>
+                <input type="number" id="edit-crumble-price" step="0.01" value="${item.crumble_price || 0}" required>
+            </div>
+            ` : ''}
+            ${variant === 'mix' ? `
+            <div class="form-group">
+                <label for="edit-mix-price">Mix Price (EGP):</label>
+                <input type="number" id="edit-mix-price" step="0.01" value="${item.mix_price || 0}" required>
+            </div>
+            ` : ''}
             <div class="form-group">
                 <label for="edit-image-upload">Upload New Image:</label>
                 <input type="file" id="edit-image-upload" accept="image/*" class="file-input">
@@ -6505,6 +6524,18 @@
                     <img id="preview-image" alt="Preview">
                     <button type="button" id="remove-preview" class="remove-preview-btn">Remove</button>
                 </div>
+            </div>
+            <div class="form-group">
+                <label for="edit-description">Description:</label>
+                <textarea id="edit-description" rows="3">${item.description || ''}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="edit-slug">Slug:</label>
+                <input type="text" id="edit-slug" value="${item.slug || ''}">
+            </div>
+            <div class="form-group">
+                <label for="edit-is-active">Active:</label>
+                <input type="checkbox" id="edit-is-active" ${item.is_active ? 'checked' : ''}>
             </div>
         `
             }
@@ -6532,7 +6563,6 @@
             setupEditModalEvents(editModal, item, type, variant)
             setupImageUploadPreview()
         }
-
 
         // Update the getFullImageUrl function
         function getFullImageUrl(imageUrl) {
@@ -6634,13 +6664,15 @@
 
 
         // Update the uploadImageToGitHub function to use the fetched credentials
+        // Update the uploadImageToGitHub function to handle filename conflicts
         async function uploadImageToGitHub(file, itemId, type, variant = null) {
             try {
-                // Generate filename with variant
+                // Generate unique filename with random component
                 const fileExtension = file.name.split('.').pop();
                 const timestamp = new Date().getTime();
+                const randomString = Math.random().toString(36).substring(2, 8);
                 const variantSuffix = variant ? `_${variant}` : '';
-                const filename = `${type}_${itemId}${variantSuffix}_${timestamp}.${fileExtension}`;
+                const filename = `${type}_${itemId}${variantSuffix}_${timestamp}_${randomString}.${fileExtension}`;
                 const path = `images/${filename}`;
 
                 const base64Content = await fileToBase64(file);
@@ -6658,7 +6690,9 @@
                 });
 
                 if (!response.ok) {
-                    throw new Error(`GitHub API error: ${response.status}`);
+                    const errorData = await response.json();
+                    console.error('GitHub API error details:', errorData);
+                    throw new Error(`GitHub API error: ${response.status} - ${errorData.message}`);
                 }
 
                 const result = await response.json();
@@ -6666,6 +6700,7 @@
 
             } catch (error) {
                 console.error('Error uploading image to GitHub:', error);
+                showToast('Error uploading image: ' + error.message);
                 return null;
             }
         }
@@ -6723,7 +6758,7 @@
 
 
 
-        // Update the saveItemChanges function to check image availability
+        // Update the saveItemChanges function for boxes
         async function saveItemChanges(itemId, type, modal, variant = null) {
             try {
                 const form = modal.querySelector('#edit-item-form');
@@ -6746,49 +6781,44 @@
 
                 let imageUrl = '';
 
-                // If a new file is selected, upload it with waiting
+                // If a new file is selected, upload it
                 if (file) {
                     // Show waiting modal
                     const waitingModalHTML = `
-                    <div class="modal" id="upload-waiting-modal" 
-                        style="display: flex; justify-content: center; align-items: center; height: 100vh;">
+                <div class="modal" id="upload-waiting-modal" 
+                    style="display: flex; justify-content: center; align-items: center; height: 100vh;">
+                
+                <div class="modal-content" style="max-width: 500px; width: 100%; background: #fff;">
+                   
+                    <div class="modal-body" style="display: flex; flex-direction: column; align-items: center; gap: 1rem;">
                     
-                    <div class="modal-content" style="max-width: 500px; width: 100%; background: #fff;">
-                       
-                        <div class="modal-body" style="display: flex; flex-direction: column; align-items: center; gap: 1rem;">
-                        
-                        <!-- Spinner -->
-                        <div style="width: 50px; height: 50px; border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite;"></div>
-                        
-                        <!-- Title -->
-                        <h3 style="color: var(--primary); margin: 0;">Uploading The Image</h3>
-                        
-                        <!-- Subtitle -->
-                        <p style="color: var(--gray); font-size: 0.9rem; margin: 0;">
-                            This may take a while...
-                        </p>
-                        </div>
+                    <!-- Spinner -->
+                    <div style="width: 50px; height: 50px; border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                    
+                    <!-- Title -->
+                    <h3 style="color: var(--primary); margin: 0;">Uploading The Image</h3>
+                    
+                    <!-- Subtitle -->
+                    <p style="color: var(--gray); font-size: 0.9rem; margin: 0;">
+                        This may take a while...
+                    </p>
                     </div>
-                    </div>
-                    `;
-
-
+                </div>
+                </div>
+            `;
 
                     document.body.insertAdjacentHTML('beforeend', waitingModalHTML);
                     const waitingModal = document.getElementById('upload-waiting-modal');
-                    const uploadStatus = document.getElementById('upload-status');
 
                     try {
-
-                        // Step 1: Upload to GitHub
-                        // uploadStatus.textContent = 'Step 1/2: Uploading file to GitHub repository...';
+                        // Upload to GitHub
                         imageUrl = await uploadImageToGitHub(file, itemId, type, variant);
 
                         if (!imageUrl) {
                             throw new Error('Upload failed - no URL returned');
                         }
 
-                        const fullImageUrl = `https://nourmhmed.github.io/www/${imageUrl}`;
+                        const fullImageUrl = `https://${GITHUB_USERNAME}.github.io/${GITHUB_REPO}/${imageUrl}`;
                         const isAvailable = await waitForImageAvailability(fullImageUrl);
 
                         if (!isAvailable) {
@@ -6833,10 +6863,23 @@
                         }
                     }
                 } else {
+                    // Box update data
                     updateData.name = modal.querySelector('#edit-name').value;
-                    updateData.price = parseFloat(modal.querySelector('#edit-price').value) || 0;
-                    updateData.stock = parseInt(modal.querySelector('#edit-stock').value) || 0;
-                    updateData.quantity = parseInt(modal.querySelector('#edit-stock').value) || 0;
+                    updateData.size = modal.querySelector('#edit-size').value;
+                    updateData.cookie_count = parseInt(modal.querySelector('#edit-cookie-count').value) || 0;
+                    updateData.description = modal.querySelector('#edit-description').value;
+                    updateData.slug = modal.querySelector('#edit-slug').value;
+                    updateData.is_active = modal.querySelector('#edit-is-active').checked;
+
+                    // Update the specific variant price
+                    if (variant === 'chewy') {
+                        updateData.chewy_price = parseFloat(modal.querySelector('#edit-chewy-price').value) || 0;
+                    } else if (variant === 'crumble') {
+                        updateData.crumble_price = parseFloat(modal.querySelector('#edit-crumble-price').value) || 0;
+                    } else if (variant === 'mix') {
+                        updateData.mix_price = parseFloat(modal.querySelector('#edit-mix-price').value) || 0;
+                    }
+
                     if (imageUrl) {
                         updateData.image_url = imageUrl;
                     }
@@ -6884,17 +6927,35 @@
             }
         }
 
+        // Update table headers when the page loads
+        document.addEventListener('DOMContentLoaded', function () {
+            updateTableHeaders();
+        });
 
-
-        // Update the deleteItem function to handle variants
+        // Update the deleteItem function for cookies
         async function deleteItem(id, type, name, variant = null) {
             const itemName = variant ? `${name} (${variant})` : name;
 
             if (confirm(`Are you sure you want to delete ${itemName}? This action cannot be undone.`)) {
                 try {
                     if (type === 'cookie') {
-                        // For cookies, we need to deactivate the specific variant
-                        const updateData = {};
+                        // For cookies, we need to check if we're deleting the last variant
+                        const { data: cookieData, error: fetchError } = await supabase
+                            .from('cookies')
+                            .select('chewy_price, crumble_price')
+                            .eq('id', id)
+                            .single();
+
+                        if (fetchError) {
+                            console.error('Error fetching cookie data:', fetchError);
+                            showToast('Error fetching cookie data');
+                            return;
+                        }
+
+                        const { chewy_price, crumble_price } = cookieData;
+
+                        let updateData = {};
+
                         if (variant === 'chewy') {
                             updateData.chewy_price = null;
                             updateData.image_url_chewy = null;
@@ -6903,31 +6964,79 @@
                             updateData.image_url_crumble = null;
                         }
 
-                        const { error } = await supabase
-                            .from('cookies')
-                            .update(updateData)
-                            .eq('id', id);
+                        // Check if this is the last variant being deleted
+                        const remainingChewy = variant === 'chewy' ? null : chewy_price;
+                        const remainingCrumble = variant === 'crumble' ? null : crumble_price;
 
-                        if (error) {
-                            console.error('Error deleting cookie variant:', error);
-                            showToast('Error deleting cookie variant');
+                        const isLastVariant = !remainingChewy && !remainingCrumble;
+
+                        if (isLastVariant) {
+                            // Delete the entire cookie if no variants remain
+                            const { error } = await supabase
+                                .from('cookies')
+                                .delete()
+                                .eq('id', id);
+
+                            if (error) {
+                                console.error('Error deleting cookie:', error);
+                                showToast('Error deleting cookie');
+                            } else {
+                                showToast(`${itemName} deleted successfully`);
+                                loadCookies();
+                            }
                         } else {
-                            showToast(`${itemName} deleted successfully`);
-                            loadCookies();
+                            // Only update the specific variant
+                            const { error } = await supabase
+                                .from('cookies')
+                                .update(updateData)
+                                .eq('id', id);
+
+                            if (error) {
+                                console.error('Error deleting cookie variant:', error);
+                                showToast('Error deleting cookie variant');
+                            } else {
+                                showToast(`${itemName} deleted successfully`);
+                                loadCookies();
+                            }
                         }
                     } else {
-                        // For boxes, delete the entire item
-                        const { error } = await supabase
-                            .from('boxes')
-                            .delete()
-                            .eq('id', id);
+                        // Box deletion logic remains the same
+                        const updateData = {};
+                        if (variant === 'chewy') {
+                            updateData.chewy_price = null;
+                        } else if (variant === 'crumble') {
+                            updateData.crumble_price = null;
+                        } else if (variant === 'mix') {
+                            updateData.mix_price = null;
+                        }
 
-                        if (error) {
-                            console.error('Error deleting item:', error);
-                            showToast('Error deleting item');
-                        } else {
-                            showToast(`${itemName} deleted successfully`);
-                            loadCookies();
+                        // Check if all prices are null, then deactivate the entire box
+                        const { data: boxData, error: fetchError } = await supabase
+                            .from('boxes')
+                            .select('chewy_price, crumble_price, mix_price')
+                            .eq('id', id)
+                            .single();
+
+                        if (!fetchError) {
+                            const { chewy_price, crumble_price, mix_price } = boxData;
+                            const allPricesNull = !chewy_price && !crumble_price && !mix_price;
+
+                            if (allPricesNull) {
+                                updateData.is_active = false;
+                            }
+
+                            const { error } = await supabase
+                                .from('boxes')
+                                .update(updateData)
+                                .eq('id', id);
+
+                            if (error) {
+                                console.error('Error deleting box variant:', error);
+                                showToast('Error deleting box variant');
+                            } else {
+                                showToast(`${itemName} deleted successfully`);
+                                loadCookies();
+                            }
                         }
                     }
                 } catch (err) {
@@ -6936,9 +7045,7 @@
                 }
             }
         }
-
-
-        // Update the renderFilteredCookies function to handle the new structure
+        // Update the renderFilteredCookies function to handle box types
         function renderFilteredCookies(filteredCookies, message) {
             if (filteredCookies.length === 0) {
                 cookiesTable.innerHTML = `
@@ -6958,9 +7065,9 @@
 
                 // Function to get full image URL
                 const getImageUrl = (imageUrl) => {
-                    // if (!imageUrl) return 'https://via.placeholder.com/50x50/FFD7DF/C0394F?text=No+Image';
-                    // if (imageUrl.startsWith('http')) return imageUrl;
-                    return `http://nourmhmed.github.io/www/${imageUrl}`;
+                    if (!imageUrl) return 'https://via.placeholder.com/50x50/FFD7DF/C0394F?text=No+Image';
+                    if (imageUrl.startsWith('http')) return imageUrl;
+                    return `https://${GITHUB_USERNAME}.github.io/${GITHUB_REPO}/${imageUrl}`;
                 };
 
                 const imageUrl = getImageUrl(item.image_url);
@@ -6968,13 +7075,14 @@
                 if (item.type === 'cookie') {
                     row.innerHTML = `
                 <td>
-                    <img src="${imageUrl}" alt="${item.name}" class="item-image" >
+                    <img src="${imageUrl}" alt="${item.name}" class="item-image">
                 </td>
                 <td>${item.id}</td>
                 <td>${item.name}</td>
                 <td>Cookie (${item.variant})</td>
                 <td>${item.variant === 'chewy' ? `EGP ${item.price || 0}` : '-'}</td>
                 <td>${item.variant === 'crumble' ? `EGP ${item.price || 0}` : '-'}</td>
+                <td>-</td>
                 <td>${item.description ? (item.description.length > 50 ? item.description.substring(0, 50) + '...' : item.description) : 'No description'}</td>
                 <td>${item.slug || 'No slug'}</td>
                 <td>
@@ -6983,20 +7091,22 @@
                 </td>
             `
                 } else {
+                    // Box row with enhanced information
                     row.innerHTML = `
                 <td>
                     <img src="${imageUrl}" alt="${item.name}" class="item-image">
                 </td>
                 <td>${item.id}</td>
                 <td>${item.name}</td>
-                <td>Box</td>
-                <td>EGP ${item.price || 0}</td>
-                <td>-</td>
+                <td>Box (${item.variant})</td>
+                <td>${item.variant === 'chewy' ? `EGP ${item.price || 0}` : '-'}</td>
+                <td>${item.variant === 'crumble' ? `EGP ${item.price || 0}` : '-'}</td>
+                <td>${item.variant === 'mix' ? `EGP ${item.price || 0}` : '-'}</td>
                 <td>${item.description || 'No description'}</td>
-                <td>-</td>
+                <td>${item.slug || 'No slug'}</td>
                 <td>
-                    <button class="action-btn edit-btn" data-id="${item.id}" data-type="box">Edit</button>
-                    <button class="action-btn delete-btn" data-id="${item.id}" data-type="box">Delete</button>
+                    <button class="action-btn edit-btn" data-id="${item.original_id}" data-type="box" data-variant="${item.variant}">Edit</button>
+                    <button class="action-btn delete-btn" data-id="${item.original_id}" data-type="box" data-variant="${item.variant}">Delete</button>
                 </td>
             `
                 }
@@ -7024,6 +7134,24 @@
             })
         }
 
+        // Update the table headers for boxes to include mix price
+        function updateTableHeaders() {
+            const cookiesTableHeaders = document.querySelector('#cookies-tab-content thead tr');
+            if (cookiesTableHeaders) {
+                cookiesTableHeaders.innerHTML = `
+            <th>Image</th>
+            <th data-sort="id">ID ↕</th>
+            <th data-sort="name">Name ↕</th>
+            <th data-sort="type">Type ↕</th>
+            <th data-sort="chewy_price">Chewy Price (EGP) ↕</th>
+            <th data-sort="crumble_price">Crumble Price (EGP) ↕</th>
+            <th data-sort="mix_price">Mix Price (EGP) ↕</th>
+            <th>Description</th>
+            <th>Slug</th>
+            <th>Actions</th>
+        `;
+            }
+        }
 
 
         // Add image preview function
@@ -7315,6 +7443,7 @@
             }
         }
 
+        // Update the loadCookies function to handle boxes with three types
         async function loadCookies(loadMore = false) {
             const state = infiniteScrollState.cookies;
 
@@ -7339,7 +7468,7 @@
                     document.getElementById('cookies-loading').style.display = 'flex';
                 }
 
-                // Load all data first (for combined tables, we'll optimize later)
+                // Load all data first
                 const { data: cookiesData, error: cookiesError } = await supabase
                     .from('cookies')
                     .select('*')
@@ -7362,7 +7491,7 @@
                 // Combine and process data
                 let combinedItems = [];
 
-                // Process cookies
+                // Process cookies (same as before)
                 if (cookiesData) {
                     cookiesData.forEach(cookie => {
                         if (cookie.chewy_price && cookie.is_active) {
@@ -7399,19 +7528,63 @@
                     });
                 }
 
-                // Process boxes
+                // Process boxes with three types
                 if (boxesData) {
                     boxesData.forEach(box => {
-                        combinedItems.push({
-                            ...box,
-                            type: 'box',
-                            id: box.id,
-                            name: box.name,
-                            price: box.price || box.cost || 0,
-                            stock: box.stock || box.quantity || 0,
-                            image_url: box.image_url || '',
-                            variant: null
-                        });
+                        // Create three entries for each box type
+                        if (box.chewy_price && box.is_active) {
+                            combinedItems.push({
+                                id: `${box.id}_chewy`,
+                                original_id: box.id,
+                                name: `${box.name} (Chewy)`,
+                                type: 'box',
+                                variant: 'chewy',
+                                price: box.chewy_price,
+                                description: box.description || '',
+                                slug: box.slug || '',
+                                image_url: box.image_url || '',
+                                is_active: box.is_active,
+                                created_at: box.created_at,
+                                size: box.size,
+                                cookie_count: box.cookie_count
+                            });
+                        }
+
+                        if (box.crumble_price && box.is_active) {
+                            combinedItems.push({
+                                id: `${box.id}_crumble`,
+                                original_id: box.id,
+                                name: `${box.name} (Crumble)`,
+                                type: 'box',
+                                variant: 'crumble',
+                                price: box.crumble_price,
+                                description: box.description || '',
+                                slug: box.slug || '',
+                                image_url: box.image_url || '',
+                                is_active: box.is_active,
+                                created_at: box.created_at,
+                                size: box.size,
+                                cookie_count: box.cookie_count
+                            });
+                        }
+
+                        if (box.mix_price && box.is_active) {
+                            combinedItems.push({
+                                id: `${box.id}_mix`,
+                                original_id: box.id,
+                                name: `${box.name} (Mix)`,
+                                type: 'box',
+                                variant: 'mix',
+                                price: box.mix_price,
+                                description: box.description || '',
+                                slug: box.slug || '',
+                                image_url: box.image_url || '',
+                                is_active: box.is_active,
+                                created_at: box.created_at,
+                                size: box.size,
+                                cookie_count: box.cookie_count
+                            });
+                        }
                     });
                 }
 
@@ -7573,10 +7746,649 @@
                 })
             })
 
-            // Add new item button
+            // Add new item button functionality
             document.getElementById('add-item-btn').addEventListener('click', () => {
-                showToast('Add new item functionality would go here')
-            })
+                showAddItemModal();
+            });
+
+            // Function to show the add item modal
+            function showAddItemModal() {
+                const modalHTML = `
+        <div class="modal" id="add-item-modal">
+            <div class="modal-content" style="max-width: 700px; position: relative;">
+                <!-- Loading Overlay -->
+                <div class="loading-overlay" id="loading-overlay" style="display: none;">
+                    <div class="upload-spinner"></div>
+                    <p>Uploading Image...</p>
+                </div>
+                
+                <div class="modal-header">
+                    <h2 class="modal-title">Add New Item</h2>
+                    <button class="close-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="add-item-form" class="edit-form">
+                        <div class="form-group">
+                            <label for="item-type">Item Type:</label>
+                            <select id="item-type" required>
+                                <option value="">Select Item Type</option>
+                                <option value="cookie">Cookie</option>
+                                <option value="box">Box</option>
+                            </select>
+                        </div>
+
+                        <!-- Common Fields -->
+                        <div class="form-group">
+                            <label for="add-name">Name:</label>
+                            <input type="text" id="add-name" required>
+                            <small>Enter the name of the cookie or box</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="add-description">Description:</label>
+                            <textarea id="add-description" rows="3" placeholder="Enter item description..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="add-slug">Slug:</label>
+                            <input type="text" id="add-slug">
+                            <small>URL-friendly identifier (auto-generated if empty)</small>
+                        </div>
+
+                        <!-- Cookie Specific Fields -->
+                        <div id="cookie-fields" style="display: none;">
+                            <div class="form-group">
+                                <label>Cookie Variants:</label>
+                                <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.5rem;">
+                                    <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <input type="checkbox" id="add-chewy-variant" value="chewy">
+                                        <span>🍪 Chewy</span>
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <input type="checkbox" id="add-crumble-variant" value="crumble">
+                                        <span>🍪 Crumble</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div id="chewy-fields" style="display: none; margin-top: 1rem; padding: 1rem; background: var(--gray-100); border-radius: 8px;">
+                                <h4 style="margin-bottom: 1rem; color: var(--primary);">Chewy Variant</h4>
+                                <div class="form-group">
+                                    <label for="add-chewy-price">Chewy Price (EGP):</label>
+                                    <input type="number" id="add-chewy-price" step="0.01" min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="add-chewy-image">Chewy Image:</label>
+                                    <input type="file" id="add-chewy-image" accept="image/*" class="file-input">
+                                    <small>Supported formats: JPG, PNG, SVG, WebP (Max 2MB)</small>
+                                    <div class="image-preview" id="chewy-image-preview" style="display: none;">
+                                        <img id="chewy-preview-image" alt="Chewy Preview">
+                                        <button type="button" id="remove-chewy-preview" class="remove-preview-btn">Remove</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="crumble-fields" style="display: none; margin-top: 1rem; padding: 1rem; background: var(--gray-100); border-radius: 8px;">
+                                <h4 style="margin-bottom: 1rem; color: var(--primary);">Crumble Variant</h4>
+                                <div class="form-group">
+                                    <label for="add-crumble-price">Crumble Price (EGP):</label>
+                                    <input type="number" id="add-crumble-price" step="0.01" min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="add-crumble-image">Crumble Image:</label>
+                                    <input type="file" id="add-crumble-image" accept="image/*" class="file-input">
+                                    <small>Supported formats: JPG, PNG, SVG, WebP (Max 2MB)</small>
+                                    <div class="image-preview" id="crumble-image-preview" style="display: none;">
+                                        <img id="crumble-preview-image" alt="Crumble Preview">
+                                        <button type="button" id="remove-crumble-preview" class="remove-preview-btn">Remove</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Additional Cookie Fields -->
+                            <div class="form-group">
+                                <label for="add-ingredients">Ingredients:</label>
+                                <textarea id="add-ingredients" rows="2" placeholder="List of ingredients..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="add-specialty">Specialty:</label>
+                                <textarea id="add-specialty" rows="2" placeholder="What makes this cookie special..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="add-perfect-for">Perfect For:</label>
+                                <textarea id="add-perfect-for" rows="2" placeholder="Ideal occasions or pairings..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="add-tags">Tags:</label>
+                                <input type="text" id="add-tags" placeholder="popular, new, seasonal (comma separated)">
+                                <small>Add tags to help categorize the cookie</small>
+                            </div>
+                        </div>
+
+                        <!-- Box Specific Fields -->
+                        <div id="box-fields" style="display: none;">
+                            <div class="form-group">
+                                <label for="add-size">Size:</label>
+                                <select id="add-size" required>
+                                    <option value="">Select Size</option>
+                                    <option value="duo">Duo (2 cookies)</option>
+                                    <option value="trio">Trio (3 cookies)</option>
+                                    <option value="classic">Classic (4 cookies)</option>
+                                    <option value="craver">Craver (6 cookies)</option>
+                                    <option value="feast">Feast (9 cookies)</option>
+                                    <option value="custom">Custom</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="add-cookie-count">Cookie Count:</label>
+                                <input type="number" id="add-cookie-count" min="1" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Box Variants:</label>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 0.5rem;">
+                                    <div style="padding: 1rem; background: var(--gray-100); border-radius: 8px;">
+                                        <h4 style="margin-bottom: 0.5rem; color: var(--primary);">Chewy</h4>
+                                        <div class="form-group">
+                                            <label for="add-box-chewy-price">Price (EGP):</label>
+                                            <input type="number" id="add-box-chewy-price" step="0.01" min="0" required>
+                                        </div>
+                                    </div>
+                                    <div style="padding: 1rem; background: var(--gray-100); border-radius: 8px;">
+                                        <h4 style="margin-bottom: 0.5rem; color: var(--primary);">Crumble</h4>
+                                        <div class="form-group">
+                                            <label for="add-box-crumble-price">Price (EGP):</label>
+                                            <input type="number" id="add-box-crumble-price" step="0.01" min="0" required>
+                                        </div>
+                                    </div>
+                                    <div style="padding: 1rem; background: var(--gray-100); border-radius: 8px;">
+                                        <h4 style="margin-bottom: 0.5rem; color: var(--primary);">Mix</h4>
+                                        <div class="form-group">
+                                            <label for="add-box-mix-price">Price (EGP):</label>
+                                            <input type="number" id="add-box-mix-price" step="0.01" min="0" required>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="add-box-image">Box Image:</label>
+                                <input type="file" id="add-box-image" accept="image/*" class="file-input">
+                                <small>Supported formats: JPG, PNG, SVG, WebP (Max 2MB)</small>
+                                <div class="image-preview" id="box-image-preview" style="display: none;">
+                                    <img id="box-preview-image" alt="Box Preview">
+                                    <button type="button" id="remove-box-preview" class="remove-preview-btn">Remove</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="add-is-active" style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" id="add-is-active" checked>
+                                <span>✅ Active Item</span>
+                            </label>
+                            <small>Uncheck to create this item as inactive</small>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-actions">
+                    <button class="modal-btn btn-secondary" id="cancel-add-btn">
+                        <span>✕</span> Cancel
+                    </button>
+                    <button class="modal-btn btn-primary" id="save-add-btn">
+                        <span>✓</span> Create Item
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+
+                document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+                const addModal = document.getElementById('add-item-modal');
+                addModal.style.display = 'flex';
+
+                setupAddModalEvents(addModal);
+                setupAddFormInteractions();
+            }
+
+            // Setup add modal event listeners
+            function setupAddModalEvents(modal) {
+                const closeModal = modal.querySelector('.close-modal');
+                const cancelBtn = modal.querySelector('#cancel-add-btn');
+
+                const closeModalHandler = () => {
+                    modal.remove();
+                };
+
+                closeModal.addEventListener('click', closeModalHandler);
+                cancelBtn.addEventListener('click', closeModalHandler);
+
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        closeModalHandler();
+                    }
+                });
+
+                const saveBtn = modal.querySelector('#save-add-btn');
+                saveBtn.addEventListener('click', async () => {
+                    await saveNewItem(modal);
+                });
+
+                // Enter key support
+                modal.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        saveBtn.click();
+                    }
+                });
+            }
+
+            // Setup form interactions for the add modal
+            function setupAddFormInteractions() {
+                const itemTypeSelect = document.getElementById('item-type');
+                const cookieFields = document.getElementById('cookie-fields');
+                const boxFields = document.getElementById('box-fields');
+                const sizeSelect = document.getElementById('add-size');
+
+                // Item type change handler
+                itemTypeSelect.addEventListener('change', function () {
+                    const type = this.value;
+
+                    cookieFields.style.display = type === 'cookie' ? 'block' : 'none';
+                    boxFields.style.display = type === 'box' ? 'block' : 'none';
+
+                    // Reset form when switching types
+                    if (type === 'cookie') {
+                        resetBoxFields();
+                    } else if (type === 'box') {
+                        resetCookieFields();
+                    }
+                });
+
+                // Cookie variant checkboxes
+                document.getElementById('add-chewy-variant').addEventListener('change', function () {
+                    document.getElementById('chewy-fields').style.display = this.checked ? 'block' : 'none';
+                    if (!this.checked) {
+                        document.getElementById('add-chewy-price').value = '';
+                        document.getElementById('add-chewy-image').value = '';
+                        document.getElementById('chewy-image-preview').style.display = 'none';
+                    }
+                });
+
+                document.getElementById('add-crumble-variant').addEventListener('change', function () {
+                    document.getElementById('crumble-fields').style.display = this.checked ? 'block' : 'none';
+                    if (!this.checked) {
+                        document.getElementById('add-crumble-price').value = '';
+                        document.getElementById('add-crumble-image').value = '';
+                        document.getElementById('crumble-image-preview').style.display = 'none';
+                    }
+                });
+
+                // Box size auto-fill cookie count
+                sizeSelect.addEventListener('change', function () {
+                    const sizeConfig = {
+                        'duo': 2,
+                        'trio': 3,
+                        'classic': 4,
+                        'craver': 6,
+                        'feast': 9
+                    };
+
+                    if (sizeConfig[this.value]) {
+                        document.getElementById('add-cookie-count').value = sizeConfig[this.value];
+                    }
+                });
+
+                // Auto-generate slug from name
+                document.getElementById('add-name').addEventListener('input', function () {
+                    const slugInput = document.getElementById('add-slug');
+                    if (!slugInput.value) {
+                        const slug = this.value
+                            .toLowerCase()
+                            .replace(/[^a-z0-9]+/g, '-')
+                            .replace(/(^-|-$)/g, '');
+                        slugInput.value = slug;
+                    }
+                });
+
+                // Image preview setup
+                setupAddImagePreviews();
+            }
+
+            // Setup image previews for add form
+            function setupAddImagePreviews() {
+                // Chewy image preview
+                const chewyFileInput = document.getElementById('add-chewy-image');
+                const chewyPreview = document.getElementById('chewy-image-preview');
+                const chewyPreviewImage = document.getElementById('chewy-preview-image');
+                const removeChewyPreview = document.getElementById('remove-chewy-preview');
+
+                if (chewyFileInput) {
+                    chewyFileInput.addEventListener('change', function (e) {
+                        handleImagePreview(e, chewyPreview, chewyPreviewImage);
+                    });
+                }
+
+                if (removeChewyPreview) {
+                    removeChewyPreview.addEventListener('click', function () {
+                        chewyFileInput.value = '';
+                        chewyPreview.style.display = 'none';
+                    });
+                }
+
+                // Crumble image preview
+                const crumbleFileInput = document.getElementById('add-crumble-image');
+                const crumblePreview = document.getElementById('crumble-image-preview');
+                const crumblePreviewImage = document.getElementById('crumble-preview-image');
+                const removeCrumblePreview = document.getElementById('remove-crumble-preview');
+
+                if (crumbleFileInput) {
+                    crumbleFileInput.addEventListener('change', function (e) {
+                        handleImagePreview(e, crumblePreview, crumblePreviewImage);
+                    });
+                }
+
+                if (removeCrumblePreview) {
+                    removeCrumblePreview.addEventListener('click', function () {
+                        crumbleFileInput.value = '';
+                        crumblePreview.style.display = 'none';
+                    });
+                }
+
+                // Box image preview
+                const boxFileInput = document.getElementById('add-box-image');
+                const boxPreview = document.getElementById('box-image-preview');
+                const boxPreviewImage = document.getElementById('box-preview-image');
+                const removeBoxPreview = document.getElementById('remove-box-preview');
+
+                if (boxFileInput) {
+                    boxFileInput.addEventListener('change', function (e) {
+                        handleImagePreview(e, boxPreview, boxPreviewImage);
+                    });
+                }
+
+                if (removeBoxPreview) {
+                    removeBoxPreview.addEventListener('click', function () {
+                        boxFileInput.value = '';
+                        boxPreview.style.display = 'none';
+                    });
+                }
+            }
+
+            // Helper function for image preview
+            function handleImagePreview(event, previewContainer, previewImage) {
+                const file = event.target.files[0];
+                if (file) {
+                    if (!file.type.match('image.*')) {
+                        showToast('Please select a valid image file');
+                        return;
+                    }
+
+                    if (file.size > 2 * 1024 * 1024) {
+                        showToast('Image size must be less than 2MB');
+                        return;
+                    }
+
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        previewImage.src = e.target.result;
+                        previewContainer.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+
+            // Reset functions
+            function resetCookieFields() {
+                document.getElementById('add-chewy-variant').checked = false;
+                document.getElementById('add-crumble-variant').checked = false;
+                document.getElementById('chewy-fields').style.display = 'none';
+                document.getElementById('crumble-fields').style.display = 'none';
+                document.getElementById('add-chewy-price').value = '';
+                document.getElementById('add-crumble-price').value = '';
+                document.getElementById('add-chewy-image').value = '';
+                document.getElementById('add-crumble-image').value = '';
+                document.getElementById('chewy-image-preview').style.display = 'none';
+                document.getElementById('crumble-image-preview').style.display = 'none';
+                document.getElementById('add-ingredients').value = '';
+                document.getElementById('add-specialty').value = '';
+                document.getElementById('add-perfect-for').value = '';
+                document.getElementById('add-tags').value = '';
+            }
+
+            function resetBoxFields() {
+                document.getElementById('add-size').value = '';
+                document.getElementById('add-cookie-count').value = '';
+                document.getElementById('add-box-chewy-price').value = '';
+                document.getElementById('add-box-crumble-price').value = '';
+                document.getElementById('add-box-mix-price').value = '';
+                document.getElementById('add-box-image').value = '';
+                document.getElementById('box-image-preview').style.display = 'none';
+            }
+
+            // Main function to save new item
+            async function saveNewItem(modal) {
+                try {
+                    const itemType = document.getElementById('item-type').value;
+                    const name = document.getElementById('add-name').value.trim();
+                    const description = document.getElementById('add-description').value.trim();
+                    const slug = document.getElementById('add-slug').value.trim();
+                    const isActive = document.getElementById('add-is-active').checked;
+
+                    // Validation
+                    if (!itemType) {
+                        showToast('Please select item type');
+                        return;
+                    }
+
+                    if (!name) {
+                        showToast('Name is required');
+                        return;
+                    }
+
+                    const saveBtn = modal.querySelector('#save-add-btn');
+                    const cancelBtn = modal.querySelector('#cancel-add-btn');
+
+                    // Disable form during save
+                    const inputs = modal.querySelectorAll('input, textarea, button, select');
+                    inputs.forEach(input => {
+                        if (input !== saveBtn && input !== cancelBtn) {
+                            input.disabled = true;
+                        }
+                    });
+
+                    saveBtn.innerHTML = '<span>⏳</span> Creating Item...';
+                    saveBtn.disabled = true;
+
+                    let result;
+
+                    if (itemType === 'cookie') {
+                        result = await saveNewCookie(modal);
+                    } else if (itemType === 'box') {
+                        result = await saveNewBox(modal);
+                    }
+
+                    if (result) {
+                        showToast(`✅ ${itemType === 'cookie' ? 'Cookie' : 'Box'} created successfully`);
+                        modal.remove();
+                        loadCookies();
+                    } else {
+                        throw new Error('Failed to create item');
+                    }
+
+                } catch (err) {
+                    console.error('Failed to create item:', err);
+                    showToast('Failed to create item');
+
+                    // Re-enable form on error
+                    const inputs = modal.querySelectorAll('input, textarea, button, select');
+                    inputs.forEach(input => input.disabled = false);
+
+                    const saveBtn = modal.querySelector('#save-add-btn');
+                    saveBtn.innerHTML = '<span>✓</span> Create Item';
+                    saveBtn.disabled = false;
+                }
+            }
+
+            // Save new cookie with proper price handling
+            async function saveNewCookie(modal) {
+                const name = document.getElementById('add-name').value.trim();
+                const description = document.getElementById('add-description').value.trim();
+                const slug = document.getElementById('add-slug').value.trim() || generateSlug(name);
+                const isActive = document.getElementById('add-is-active').checked;
+                const hasChewy = document.getElementById('add-chewy-variant').checked;
+                const hasCrumble = document.getElementById('add-crumble-variant').checked;
+                const ingredients = document.getElementById('add-ingredients').value.trim();
+                const specialty = document.getElementById('add-specialty').value.trim();
+                const perfectFor = document.getElementById('add-perfect-for').value.trim();
+                const tagsInput = document.getElementById('add-tags').value.trim();
+
+                // Validate at least one variant is selected
+                if (!hasChewy && !hasCrumble) {
+                    showToast('Please select at least one cookie variant');
+                    return false;
+                }
+
+                const cookieData = {
+                    name: name,
+                    description: description,
+                    slug: slug,
+                    is_active: isActive,
+                    ingredients: ingredients || null,
+                    specialty: specialty || null,
+                    perfect_for: perfectFor || null,
+                    tags: tagsInput ? tagsInput.split(',').map(tag => tag.trim()) : []
+                };
+
+                // Set prices - use null for unselected variants
+                cookieData.chewy_price = hasChewy ? parseFloat(document.getElementById('add-chewy-price').value) : null;
+                cookieData.crumble_price = hasCrumble ? parseFloat(document.getElementById('add-crumble-price').value) : null;
+
+                // Validate prices for selected variants
+                if (hasChewy && (!cookieData.chewy_price || cookieData.chewy_price <= 0)) {
+                    showToast('Please enter a valid price for Chewy variant');
+                    return false;
+                }
+
+                if (hasCrumble && (!cookieData.crumble_price || cookieData.crumble_price <= 0)) {
+                    showToast('Please enter a valid price for Crumble variant');
+                    return false;
+                }
+
+                // Upload images for selected variants
+                if (hasChewy) {
+                    const chewyImageFile = document.getElementById('add-chewy-image').files[0];
+                    if (chewyImageFile) {
+                        // Generate a unique ID for the new cookie
+                        const tempId = `new_${Date.now()}`;
+                        const chewyImageUrl = await uploadImageToGitHub(chewyImageFile, tempId, 'cookie', 'chewy');
+                        if (chewyImageUrl) {
+                            cookieData.image_url_chewy = chewyImageUrl;
+                        }
+                    }
+                }
+
+                if (hasCrumble) {
+                    const crumbleImageFile = document.getElementById('add-crumble-image').files[0];
+                    if (crumbleImageFile) {
+                        // Generate a unique ID for the new cookie
+                        const tempId = `new_${Date.now()}`;
+                        const crumbleImageUrl = await uploadImageToGitHub(crumbleImageFile, tempId, 'cookie', 'crumble');
+                        if (crumbleImageUrl) {
+                            cookieData.image_url_crumble = crumbleImageUrl;
+                        }
+                    }
+                }
+
+                // Insert into database
+                const { data, error } = await supabase
+                    .from('cookies')
+                    .insert([cookieData])
+                    .select();
+
+                if (error) {
+                    console.error('Error creating cookie:', error);
+                    showToast('Error creating cookie: ' + error.message);
+                    return false;
+                }
+
+                return true;
+            }
+            // Save new box
+            async function saveNewBox(modal) {
+                const name = document.getElementById('add-name').value.trim();
+                const description = document.getElementById('add-description').value.trim();
+                const slug = document.getElementById('add-slug').value.trim() || generateSlug(name);
+                const size = document.getElementById('add-size').value;
+                const cookieCount = parseInt(document.getElementById('add-cookie-count').value);
+                const isActive = document.getElementById('add-is-active').checked;
+                const chewyPrice = parseFloat(document.getElementById('add-box-chewy-price').value);
+                const crumblePrice = parseFloat(document.getElementById('add-box-crumble-price').value);
+                const mixPrice = parseFloat(document.getElementById('add-box-mix-price').value);
+
+                // Validation
+                if (!size) {
+                    showToast('Please select box size');
+                    return false;
+                }
+
+                if (!cookieCount || cookieCount < 1) {
+                    showToast('Please enter valid cookie count');
+                    return false;
+                }
+
+                if (!chewyPrice || !crumblePrice || !mixPrice) {
+                    showToast('Please enter prices for all box variants');
+                    return false;
+                }
+
+                const boxData = {
+                    name: name,
+                    size: size,
+                    description: description,
+                    slug: slug,
+                    cookie_count: cookieCount,
+                    chewy_price: chewyPrice,
+                    crumble_price: crumblePrice,
+                    mix_price: mixPrice,
+                    is_active: isActive
+                };
+
+                // Upload box image
+                const boxImageFile = document.getElementById('add-box-image').files[0];
+                if (boxImageFile) {
+                    const boxImageUrl = await uploadImageToGitHub(boxImageFile, 'new_box', 'box');
+                    if (boxImageUrl) {
+                        boxData.image_url = boxImageUrl;
+                    }
+                }
+
+                // Insert into database
+                const { error } = await supabase
+                    .from('boxes')
+                    .insert([boxData]);
+
+                if (error) {
+                    console.error('Error creating box:', error);
+                    showToast('Error creating box: ' + error.message);
+                    return false;
+                }
+
+                return true;
+            }
+
+            // Helper function to generate slug
+            function generateSlug(name) {
+                return name
+                    .toLowerCase()
+                    .replace(/[^a-z0-9]+/g, '-')
+                    .replace(/(^-|-$)/g, '');
+            }
 
             // Vouchers filter buttons
             document.querySelectorAll('.filter-btn[data-filter-vouchers]').forEach(btn => {
@@ -7803,7 +8615,7 @@
 
                     // Show notification if status changed
                     if (payload.old.status !== payload.new.status) {
-                        showToast(`Order #${payload.new.id} status updated to ${payload.new.status}`)
+                        showToast(`Order ${payload.new.order_id} status updated to ${payload.new.status}`)
                     }
                 }
             })
